@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AV Orchestrator for Sustainable Cities
 
-## Getting Started
+A lightweight in-browser demo showing how autonomous vehicle fleets can be orchestrated to serve demand while minimizing energy cost and emissions. Built with Next.js (App Router), TypeScript, and Tailwind.
 
-First, run the development server:
+## Quick start (local)
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create `.env.local` with the following:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+NEXT_PUBLIC_MAPBOX_TOKEN=pk.···   # provided Mapbox token
+TOMTOM_ROUTE_MONITOR_KEY=···      # TomTom Route Monitor API key
+```
 
-## Learn More
+Without the TomTom key the app falls back to bundled sample telemetry.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a new Git repository and push this folder.
+2. In Vercel, import the repo. Framework Preset: Next.js.
+3. Build command: `next build` (default). Output: `.next` (default).
+4. Deploy. Your demo will be live in ~1 minute.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## What the demo shows
 
-## Deploy on Vercel
+- Mapbox + deck.gl 3D twin of Ingolstadt with corridor demand extrusions
+- Live TomTom route monitoring integration for Audi Forum ↔ Hauptbahnhof & Klinikum ↔ Nordbahnhof
+- Agent-based recommendations for fleet deployment, charging windows, and energy KPIs
+- Operational panel with service reliability, energy per ride, grid stress index, and demand timeline
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/lib/rl.ts`: Environment, reward, and a simple learning loop
+- `src/lib/orchestrator.ts`: Heuristic planner producing fleet & charging recommendations
+- `src/lib/scenarios.ts`: City presets (Ingolstadt, Oslo, Brussels)
+- `src/hooks/useIngolstadtRoutes.ts`: Client hook fetching TomTom data & orchestration plan
+- `src/components/IngolstadtMap.tsx`: deck.gl + Mapbox 3D twin
+- `src/components/OperationalPanel.tsx`: KPI dashboard & recommendations
+- `src/components/HomeDashboard.tsx`: Client wrapper stitching data, map, KPIs
+- `src/app/*`: Pages (home with orchestration twin, concept, how-it-works, impact, stakeholders, submission)
+
+## Notes
+
+- This is a didactic, self-contained demo (no server, no data backend).
+- The RL is a minimal stub to illustrate policy effects and KPIs.
+- Extension ideas: real demand feeds, grid CO₂ signals, ride-pooling, equity constraints, V2G.

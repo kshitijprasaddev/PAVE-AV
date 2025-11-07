@@ -13,6 +13,7 @@ import {
 import Map, { NavigationControl, ScaleControl } from "react-map-gl/mapbox";
 import type { RouteDetails } from "@/types/routes";
 import mapboxgl from "mapbox-gl";
+import type { Feature, FeatureCollection, LineString } from "geojson";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? "";
 
@@ -119,21 +120,25 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
     });
   }, [routes, trafficWeights]);
 
-  const trafficFeatures = useMemo(() => {
-    if (!trafficSegments?.length) return [] as {
-      type: "Feature";
-      geometry: { type: "LineString"; coordinates: [number, number][] };
-      properties: { id: string; delayIndex: number | null; streetName: string };
-    }[];
-    return trafficSegments.map((segment) => ({
-      type: "Feature" as const,
-      geometry: { type: "LineString" as const, coordinates: segment.coordinates },
+  type TrafficFeatureProps = { id: string; delayIndex: number | null; streetName: string };
+  type TrafficFeature = Feature<LineString, TrafficFeatureProps>;
+  type TrafficFeatureCollection = FeatureCollection<LineString, TrafficFeatureProps>;
+
+  const trafficFeatures = useMemo<TrafficFeatureCollection | null>(() => {
+    if (!trafficSegments?.length) return null;
+    const features: TrafficFeature[] = trafficSegments.map((segment) => ({
+      type: "Feature",
+      geometry: { type: "LineString", coordinates: segment.coordinates },
       properties: {
         id: segment.id,
         delayIndex: segment.delayIndex,
         streetName: segment.streetName,
       },
     }));
+    return {
+      type: "FeatureCollection",
+      features,
+    };
   }, [trafficSegments]);
 
   const layers = useMemo(() => {
@@ -159,8 +164,8 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
 
     const trafficLayer = new GeoJsonLayer({
       id: "ingolstadt-traffic",
-      data: trafficFeatures,
-      visible: Boolean(trafficSegments && trafficSegments.length > 0),
+      data: trafficFeatures ?? undefined,
+      visible: Boolean(trafficSegments?.length),
       pickable: true,
       stroked: true,
       filled: false,
@@ -189,15 +194,21 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
     const selectedRouteLayer = selectedRoute
       ? new GeoJsonLayer({
           id: "ingolstadt-selected-route",
-          data: [
-            {
-              type: "Feature",
-              geometry: {
-                type: "LineString",
-                coordinates: selectedRoute.path.map((p) => [p.longitude, p.latitude]),
+          data: {
+            type: "FeatureCollection",
+            features: [
+              {
+                type: "Feature" as const,
+                geometry: {
+                  type: "LineString" as const,
+                  coordinates: selectedRoute.path.map((p) => [p.longitude, p.latitude] as [number, number]),
+                },
+                properties: {
+                  id: selectedRoute.routeId,
+                },
               },
-            },
-          ],
+            ],
+          },
           stroked: true,
           filled: false,
           pickable: false,
@@ -239,14 +250,16 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
     return [heatmapLayer, trafficLayer, ...(selectedRouteLayer ? [selectedRouteLayer] : []), depotLayer, depotLabels];
   }, [routes, demandPoints, trafficFeatures, selectedRouteId, trafficSegments]);
 
-  const tooltip = (info: PickingInfo<RouteDetails | DemandPoint | DepotSite>) => {
+  const tooltip = (info: PickingInfo<RouteDetails | DemandPoint | DepotSite | TrafficFeature>) => {
     const object = info.object;
     if (!object) return null;
     if ("corridor" in object) {
       return `${object.corridor}\nRelative demand weight: ${object.weight.toFixed(2)}`;
     }
-    if ("streetName" in object && "delayIndex" in object) {
-      return `${object.streetName}\nDelay index: ${(object.delayIndex ?? 0).toFixed(1)} km/h`;
+    if ("properties" in object && object.properties && typeof object.properties === "object" && "streetName" in object.properties) {
+      const props = object.properties as TrafficFeatureProps;
+      const delayIndex = props.delayIndex ?? 0;
+      return `${props.streetName}\nDelay index: ${delayIndex.toFixed(1)} km/h`;
     }
     if ("name" in object && "capacityKw" in object) {
       return `${object.name}\nAvailable charging: ${(object.capacityKw / 1000).toFixed(2)} MW`;
@@ -259,7 +272,7 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
   };
 
   const handleDeckClick: DeckGLProps["onClick"] = useCallback(
-    (info) => {
+    (info: PickingInfo<RouteDetails>) => {
       if (!onRouteSelect) return;
       const obj = info.object as RouteDetails | null;
       onRouteSelect(obj ?? null);
@@ -267,7 +280,7 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
     [onRouteSelect]
   );
 
-  const getCursor: DeckGLProps["getCursor"] = useCallback(({ isDragging, isHovering }) => {
+  const getCursor: DeckGLProps["getCursor"] = useCallback(({ isDragging, isHovering }: { isDragging: boolean; isHovering: boolean }) => {
     if (isDragging) return "grabbing";
     return isHovering ? "pointer" : "grab";
   }, []);

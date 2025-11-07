@@ -13,6 +13,10 @@ type TrafficSegment = {
   sampleSize: number | null;
   delayIndex: number | null;
   percentiles: number[];
+  geometry?: {
+    type: string;
+    coordinates?: Array<[number, number]>;
+  } | null;
 };
 
 export type TrafficResponse = {

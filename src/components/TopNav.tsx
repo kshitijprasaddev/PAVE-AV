@@ -28,6 +28,7 @@ export function TopNav() {
           <a className="hover:underline underline-offset-4" href="/vision">Vision</a>
           <a className="hover:underline underline-offset-4" href="/concept">Concept</a>
           <a className="hover:underline underline-offset-4" href="/how-it-works">How it works</a>
+          <a className="hover:underline underline-offset-4" href="/rl-lab">RL Lab</a>
           <a className="hover:underline underline-offset-4" href="/impact">Impact</a>
           <a className="hover:underline underline-offset-4" href="/stakeholders">Stakeholders</a>
           <button onClick={onRun} className="rounded-md bg-emerald-600 px-3 py-1.5 font-medium text-white transition hover:bg-emerald-700">

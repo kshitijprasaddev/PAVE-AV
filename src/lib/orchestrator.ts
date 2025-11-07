@@ -82,19 +82,64 @@ export function buildOrchestrationPlan(routes: RouteDetails[]): OrchestrationPla
 
   const totalSeverity = severityScores.reduce((acc, cur) => acc + cur, 0) || routes.length;
 
-  const hotspots: HotspotAllocation[] = routes.map((route, idx) => {
+  const weightedShares = routes.map((route, idx) => {
     const severityScore = severityScores[idx];
     const severity = classifySeverity(severityScore);
-    const baseShare = severityScore / totalSeverity;
+    const routeLengthKm = Math.max((route.routeLength ?? 1500) / 1000, 0.4);
     const minShare = severity === "High" ? 0.18 : severity === "Medium" ? 0.12 : 0.08;
-    const allocationShare = clamp(baseShare + minShare, minShare, 0.45);
-    const recommendedAvs = Math.round(BASE_FLEET * allocationShare);
+    return {
+      route,
+      severityScore,
+      severity,
+      weight: routeLengthKm * (0.6 + severityScore) + minShare,
+    };
+  });
+
+  const weightSum = weightedShares.reduce((acc, item) => acc + item.weight, 0) || 1;
+
+  const provisional = weightedShares.map((item) => {
+    const baseRaw = (item.weight / weightSum) * BASE_FLEET;
+    const minVehicles = item.severity === "High" ? 14 : item.severity === "Medium" ? 9 : 5;
+    const maxVehicles = item.severity === "High" ? Math.round(BASE_FLEET * 0.28) : item.severity === "Medium" ? Math.round(BASE_FLEET * 0.2) : Math.round(BASE_FLEET * 0.14);
+    const clipped = clamp(Math.round(baseRaw), minVehicles, Math.max(minVehicles, maxVehicles));
+    return {
+      ...item,
+      raw: baseRaw,
+      recommendedAvs: clipped,
+      remainder: baseRaw - Math.floor(baseRaw),
+    };
+  });
+
+  const currentTotal = provisional.reduce((acc, item) => acc + item.recommendedAvs, 0);
+  let diff = BASE_FLEET - currentTotal;
+
+  const adjustOrder = [...provisional].sort((a, b) => b.severityScore - a.severityScore || b.raw - a.raw);
+  let idxAdjust = 0;
+  while (diff !== 0 && adjustOrder.length > 0) {
+    const target = adjustOrder[idxAdjust % adjustOrder.length];
+    if (diff > 0) {
+      target.recommendedAvs += 1;
+      diff -= 1;
+    } else if (diff < 0) {
+      const minVehicles = target.severity === "High" ? 14 : target.severity === "Medium" ? 9 : 5;
+      if (target.recommendedAvs > minVehicles) {
+        target.recommendedAvs -= 1;
+        diff += 1;
+      }
+    }
+
+    idxAdjust += 1;
+    if (idxAdjust > adjustOrder.length * 6) break;
+  }
+
+  const hotspots: HotspotAllocation[] = provisional.map((item) => {
+    const { route, severity, severityScore, recommendedAvs } = item;
     const peakMessage = severity === "High" ? "07:00 to 09:30 & 16:30 to 19:00" : severity === "Medium" ? "07:00 to 09:00" : "Off peak flex";
-    const efficiencyBoost = clamp(0.15 + severityScore * 0.2, 0.15, 0.35); // 15 to 35% delay cut
+    const efficiencyBoost = clamp(0.15 + severityScore * 0.2, 0.15, 0.35);
     const timeSavedMin = Math.round((route.delayTime ?? 0) * efficiencyBoost / 60);
-    // CO2 proxy: km * 120 g/km per vehicle, normalised weekly by recommended AVs utilisation
     const co2SavedKgPerWeek = Number(((route.routeLength / 1000) * 0.12 * recommendedAvs * 5).toFixed(1));
-    const notes = `Cut delay ~${Math.round(efficiencyBoost * 100)}% (~${timeSavedMin} min/day). CO₂ ↓ ${co2SavedKgPerWeek} kg/week via pooling & charging shifts.`;
+    const sharePct = Math.round((recommendedAvs / BASE_FLEET) * 100);
+    const notes = `Cut delay ~${Math.round(efficiencyBoost * 100)}% (~${timeSavedMin} min/day). CO₂ ↓ ${co2SavedKgPerWeek} kg/week. Fleet staging: ${recommendedAvs} AVs (~${sharePct}% of the active pool).`;
     return {
       corridor: route.routeName,
       severity,

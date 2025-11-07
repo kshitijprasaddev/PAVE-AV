@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import DeckGL, { type DeckGLProps } from "@deck.gl/react";
-import { PathLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
+import { GeoJsonLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import {
   AmbientLight,
@@ -67,8 +67,23 @@ function severityColor(value: number) {
 
 type MapViewState = typeof initialViewState;
 
-export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean; showLegend?: boolean; trafficWeights?: Record<string, number> }) {
-  const { routes, loading, showLegend = true, trafficWeights } = props;
+type IngolstadtMapProps = {
+  routes: RouteDetails[];
+  loading?: boolean;
+  showLegend?: boolean;
+  trafficWeights?: Record<string, number>;
+  trafficSegments?: {
+    id: string;
+    coordinates: [number, number][];
+    delayIndex: number | null;
+    streetName: string;
+  }[];
+  selectedRouteId?: string | null;
+  onRouteSelect?: (route: RouteDetails | null) => void;
+};
+
+export function IngolstadtMap(props: IngolstadtMapProps) {
+  const { routes, loading, showLegend = true, trafficWeights, trafficSegments, selectedRouteId, onRouteSelect } = props;
   const [viewState, setViewState] = useState(initialViewState);
 
   const demandPoints: DemandPoint[] = useMemo(() => {
@@ -104,19 +119,22 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
     });
   }, [routes, trafficWeights]);
 
-  const routeTrafficScores = useMemo(() => {
-    const scores: Record<string, number> = {};
-    for (const route of routes) {
-      const maxWeight = route.segments.reduce((max, segment) => {
-        const key = segment.newSegmentId ?? (segment.segmentId != null ? String(segment.segmentId) : null);
-        if (!key || !trafficWeights) return max;
-        const weight = trafficWeights[key] ?? 0;
-        return Math.max(max, weight);
-      }, 0);
-      scores[route.routeId] = maxWeight;
-    }
-    return scores;
-  }, [routes, trafficWeights]);
+  const trafficFeatures = useMemo(() => {
+    if (!trafficSegments?.length) return [] as {
+      type: "Feature";
+      geometry: { type: "LineString"; coordinates: [number, number][] };
+      properties: { id: string; delayIndex: number | null; streetName: string };
+    }[];
+    return trafficSegments.map((segment) => ({
+      type: "Feature" as const,
+      geometry: { type: "LineString" as const, coordinates: segment.coordinates },
+      properties: {
+        id: segment.id,
+        delayIndex: segment.delayIndex,
+        streetName: segment.streetName,
+      },
+    }));
+  }, [trafficSegments]);
 
   const layers = useMemo(() => {
     const baseColorRange: [number, number, number, number][] = [
@@ -128,26 +146,6 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
       [16, 68, 201, 250],
     ];
 
-    const pathLayer = new PathLayer<RouteDetails>({
-      id: "ingolstadt-routes",
-      data: routes,
-      pickable: true,
-      widthMinPixels: 5,
-      widthMaxPixels: 18,
-      getPath: (route) => route.path.map((point) => [point.longitude, point.latitude]) as [number, number][],
-      getColor: (route) => {
-        const delayRatio = route.typicalTravelTime > 0 ? route.delayTime / route.typicalTravelTime : 0;
-        const trafficBoost = routeTrafficScores[route.routeId] ?? 0;
-        return [...severityColor(Math.min(1, delayRatio + trafficBoost / 40)), 220] as [number, number, number, number];
-      },
-      getWidth: (route) => {
-        const severity = route.typicalTravelTime > 0 ? route.delayTime / route.typicalTravelTime : 0;
-        const trafficBoost = routeTrafficScores[route.routeId] ?? 0;
-        const combined = Math.min(1.5, severity + trafficBoost / 25);
-        return 5 + combined * 14;
-      },
-    });
-
     const heatmapLayer = new HeatmapLayer<DemandPoint>({
       id: "ingolstadt-demand-heat",
       data: demandPoints,
@@ -158,6 +156,57 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
       threshold: 0.03,
       colorRange: baseColorRange,
     });
+
+    const trafficLayer = new GeoJsonLayer({
+      id: "ingolstadt-traffic",
+      data: trafficFeatures,
+      visible: Boolean(trafficSegments && trafficSegments.length > 0),
+      pickable: true,
+      stroked: true,
+      filled: false,
+      getLineColor: (feature: { properties?: { delayIndex?: number | null } }) => {
+        const delayIndex = feature.properties?.delayIndex ?? 0;
+        const severity = Math.min(1, delayIndex / 30);
+        const base = severityColor(severity);
+        return [base[0], Math.max(0, base[1]), Math.max(0, base[2]), 240];
+      },
+      getLineWidth: (feature: { properties?: { delayIndex?: number | null } }) => {
+        const delayIndex = feature.properties?.delayIndex ?? 0;
+        return 2.5 + Math.min(8, delayIndex * 0.45);
+      },
+      lineWidthUnits: "pixels",
+      parameters: {
+        depthTest: false,
+      },
+      updateTriggers: {
+        getLineColor: trafficSegments,
+        getLineWidth: trafficSegments,
+      },
+    });
+
+    const selectedRoute = selectedRouteId ? routes.find((route) => route.routeId === selectedRouteId) : null;
+
+    const selectedRouteLayer = selectedRoute
+      ? new GeoJsonLayer({
+          id: "ingolstadt-selected-route",
+          data: [
+            {
+              type: "Feature",
+              geometry: {
+                type: "LineString",
+                coordinates: selectedRoute.path.map((p) => [p.longitude, p.latitude]),
+              },
+            },
+          ],
+          stroked: true,
+          filled: false,
+          pickable: false,
+          getLineColor: [255, 255, 255, 255],
+          getLineWidth: 6,
+          lineWidthUnits: "pixels",
+          parameters: { depthTest: false },
+        })
+      : null;
 
     const depotLayer = new ScatterplotLayer<DepotSite>({
       id: "ingolstadt-depots",
@@ -187,8 +236,8 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
       backgroundPadding: [6, 3],
     });
 
-    return [heatmapLayer, pathLayer, depotLayer, depotLabels];
-  }, [routes, demandPoints, routeTrafficScores]);
+    return [heatmapLayer, trafficLayer, ...(selectedRouteLayer ? [selectedRouteLayer] : []), depotLayer, depotLabels];
+  }, [routes, demandPoints, trafficFeatures, selectedRouteId, trafficSegments]);
 
   const tooltip = (info: PickingInfo<RouteDetails | DemandPoint | DepotSite>) => {
     const object = info.object;
@@ -196,9 +245,8 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
     if ("corridor" in object) {
       return `${object.corridor}\nRelative demand weight: ${object.weight.toFixed(2)}`;
     }
-    if ("routeName" in object) {
-      const delay = object.typicalTravelTime > 0 ? object.delayTime / object.typicalTravelTime : 0;
-      return `${object.routeName}\nDelay ratio: ${(delay * 100).toFixed(1)}%`;
+    if ("streetName" in object && "delayIndex" in object) {
+      return `${object.streetName}\nDelay index: ${(object.delayIndex ?? 0).toFixed(1)} km/h`;
     }
     if ("name" in object && "capacityKw" in object) {
       return `${object.name}\nAvailable charging: ${(object.capacityKw / 1000).toFixed(2)} MW`;
@@ -210,6 +258,20 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
     setViewState(event.viewState as MapViewState);
   };
 
+  const handleDeckClick: DeckGLProps["onClick"] = useCallback(
+    (info) => {
+      if (!onRouteSelect) return;
+      const obj = info.object as RouteDetails | null;
+      onRouteSelect(obj ?? null);
+    },
+    [onRouteSelect]
+  );
+
+  const getCursor: DeckGLProps["getCursor"] = useCallback(({ isDragging, isHovering }) => {
+    if (isDragging) return "grabbing";
+    return isHovering ? "pointer" : "grab";
+  }, []);
+
   return (
     <div className="relative w-full overflow-hidden rounded-xl border border-neutral-200 bg-gray-100 shadow-xl dark:border-neutral-800 dark:bg-gray-900 min-h-[480px]">
       <DeckGL
@@ -219,6 +281,8 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
         controller
         viewState={viewState}
         onViewStateChange={handleViewStateChange}
+        onClick={handleDeckClick}
+        getCursor={getCursor}
       >
         <Map
           reuseMaps
@@ -237,19 +301,23 @@ export function IngolstadtMap(props: { routes: RouteDetails[]; loading?: boolean
         </Map>
       </DeckGL>
       {showLegend && (
-        <div className="pointer-events-none absolute top-3 right-3 rounded-md bg-white/85 px-3 py-2 text-[11px] shadow dark:bg-neutral-900/80">
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-md bg-white/85 px-3 py-2 text-[11px] shadow dark:bg-neutral-900/80">
           <div className="font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">Legend</div>
           <div className="mt-1 flex items-center gap-2">
             <span className="h-2 w-4 rounded-full bg-gradient-to-r from-blue-100 via-blue-400 to-blue-700" />
             <span>Heat = ride demand density</span>
           </div>
           <div className="mt-1 flex items-center gap-2">
-            <span className="text-red-500">━</span>
-            <span>Thicker route = higher delay</span>
+            <span className="h-1.5 w-6 rounded-full bg-gradient-to-r from-yellow-400 to-red-600" />
+            <span>Glowing line = live congestion severity</span>
           </div>
           <div className="mt-1 flex items-center gap-2">
             <span className="inline-block h-3 w-3 rounded bg-emerald-500"></span>
             <span>Charging depots</span>
+          </div>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="h-1 w-6 rounded-full bg-white"></span>
+            <span>White path = corridor you selected</span>
           </div>
         </div>
       )}

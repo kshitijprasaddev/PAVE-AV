@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Hero } from "@/components/Hero";
 
@@ -13,6 +13,12 @@ export function IntroSequence({ onReveal, revealed }: IntroSequenceProps) {
   const [stage, setStage] = useState<"intro" | "hero">("intro");
 
   const showHero = stage === "hero";
+
+  useEffect(() => {
+    if (revealed || stage !== "intro") return;
+    const timer = setTimeout(() => setStage("hero"), 3400);
+    return () => clearTimeout(timer);
+  }, [revealed, stage]);
 
   return (
     <>
@@ -30,6 +36,8 @@ export function IntroSequence({ onReveal, revealed }: IntroSequenceProps) {
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: "linear-gradient(to bottom, rgba(5,5,10,0.6), rgba(5,5,10,0.9)), url('/robin-pierre-dPgPoiUIiXk-unsplash.jpg')" }}
             />
+            <div className="pointer-events-none absolute -left-24 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-emerald-400/20 blur-3xl" />
+            <div className="pointer-events-none absolute right-[-10%] top-20 h-72 w-72 rounded-full bg-sky-400/20 blur-3xl" />
             <motion.div
               className="relative z-10 mx-auto flex max-w-3xl flex-col items-center gap-6 px-6 text-center text-white"
               initial={{ y: 24, opacity: 0 }}
@@ -56,9 +64,9 @@ export function IntroSequence({ onReveal, revealed }: IntroSequenceProps) {
               </div>
               <button
                 onClick={() => setStage("hero")}
-                className="rounded-full bg-emerald-500 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:scale-105 hover:bg-emerald-400"
+                className="rounded-full border border-white/40 px-8 py-3 text-sm font-semibold text-white/85 transition hover:-translate-y-0.5 hover:border-white/70 hover:text-white"
               >
-                Continue
+                Skip intro
               </button>
             </motion.div>
           </motion.section>

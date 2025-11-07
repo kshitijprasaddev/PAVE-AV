@@ -9,144 +9,49 @@ import { OperationalPanel } from "@/components/OperationalPanel";
 import { MetricsModal } from "@/components/MetricsModal";
 import { RLSidePanel } from "@/components/RLSidePanel";
 import { TrafficInsights } from "@/components/TrafficInsights";
-import { AVEnv, type Action } from "@/lib/rl";
-import { scenarioIngolstadt } from "@/lib/scenarios";
+import { ExperienceStrip } from "@/components/ExperienceStrip";
+import { NeuralNetworkViz } from "@/components/NeuralNetworkViz";
+import {
+  simulateEpisode,
+  perturbParams,
+  BASE_POLICY_PARAMS,
+  cloneTimeline,
+  type EpisodeMetrics,
+  type PolicyParams,
+  type StepInsight,
+  AVERAGE_ENERGY_PRICE,
+} from "@/lib/rlSimulation";
+import { requestEpisode } from "@/lib/rlClient";
+import type { RouteDetails } from "@/types/routes";
 
 const DynamicIngolstadtMap = dynamic(
   () => import("@/components/IngolstadtMap").then((mod) => mod.IngolstadtMap),
   { ssr: false }
 );
 
-type PolicyParams = {
-  demandWeight: number;
-  energyWeight: number;
-  chargeThreshold: number;
-  exploration: number;
-};
-
-type TimelinePoint = { hour: number; demand: number; supply: number };
-
-type RLMetrics = {
-  served: number;
-  unmet: number;
-  energyCost: number;
-  rewardTotal: number;
-  rewardAvg: number;
-  timeline: TimelinePoint[];
-  params: PolicyParams;
-};
-
-const BASE_PARAMS: PolicyParams = {
-  demandWeight: 1.1,
-  energyWeight: 0.25,
-  chargeThreshold: 0.35,
-  exploration: 0.08,
-};
-
 const EPOCH_COUNT = 10;
 const STEPS_PER_EPOCH = 180;
-const AVG_ENERGY_PRICE = 0.25; // €/kWh proxy
 
-function cloneTimeline(timeline: TimelinePoint[]): TimelinePoint[] {
-  return timeline.map((slot) => ({ ...slot }));
-}
-
-function chooseActions(env: AVEnv, params: PolicyParams): Action[] {
-  const state = env.getState();
-  const actions: Action[] = [];
-  const hour = Math.floor((state.tick % 1440) / 60);
-  const offPeak = hour < 6 || hour >= 22;
-
-  for (const v of state.vehicles) {
-    const batteryRatio = v.batteryKwh / v.maxBatteryKwh;
-    const shouldCharge = batteryRatio < params.chargeThreshold || (offPeak && batteryRatio < 0.92);
-    if (shouldCharge) {
-      actions.push({ vehicleId: v.id, type: "charge", chargeKw: offPeak ? 11 : 7 });
-      continue;
-    }
-
-    const neighbors = env.getNeighbors(v.cellId);
-    const options = [v.cellId, ...neighbors];
-    const scored = options.map((cellId) => {
-      const demand = state.demandByCell[cellId] ?? 0;
-      const vehiclesHere = state.vehicles.filter((x) => x.cellId === cellId).length + 1;
-      const loadRatio = demand / vehiclesHere;
-      const energyPenalty = state.energyPriceEurPerKwh;
-      const score = params.demandWeight * loadRatio - params.energyWeight * energyPenalty;
-      return { cellId, score };
-    });
-
-    scored.sort((a, b) => b.score - a.score);
-    let target = scored[0]?.cellId ?? v.cellId;
-
-    if (params.exploration > 0 && Math.random() < params.exploration && neighbors.length > 0) {
-      target = neighbors[Math.floor(Math.random() * neighbors.length)];
-    }
-
-    if (target !== v.cellId) {
-      actions.push({ vehicleId: v.id, type: "move", targetCellId: target });
-    } else {
-      actions.push({ vehicleId: v.id, type: "idle" });
-    }
-  }
-
-  return actions;
-}
-
-function simulateEpisode(params: PolicyParams, fleetSize: number, steps: number): RLMetrics {
-  const scenario = scenarioIngolstadt();
-  const env = new AVEnv({ scenario, fleetSize });
-  const timelineBuckets = Array.from({ length: 24 }).map(() => ({ demand: 0, supply: 0, count: 0 }));
-
-  let served = 0;
-  let unmet = 0;
-  let energyCost = 0;
-  let rewardTotal = 0;
-
-  for (let i = 0; i < steps; i++) {
-    const actions = chooseActions(env, params);
-    const result = env.step(actions);
-    served += result.info.servedRides;
-    unmet += result.info.unmetDemand;
-    energyCost += result.info.energyCost;
-    rewardTotal += result.reward;
-
-    const hour = result.nextState.tick % 24;
-    timelineBuckets[hour].demand += result.info.unmetDemand + result.info.servedRides;
-    timelineBuckets[hour].supply += result.info.servedRides;
-    timelineBuckets[hour].count += 1;
-  }
-
-  const timeline = timelineBuckets.map((bucket, hour) => {
-    const divisor = bucket.count || 1;
-    return {
-      hour,
-      demand: Number((bucket.demand / divisor).toFixed(1)),
-      supply: Number((bucket.supply / divisor).toFixed(1)),
-    };
-  });
-
-  return {
-    served: Math.round(served),
-    unmet: Math.round(unmet),
-    energyCost: Number(energyCost.toFixed(2)),
-    rewardTotal: Number(rewardTotal.toFixed(2)),
-    rewardAvg: Number((rewardTotal / steps).toFixed(2)),
-    timeline,
-    params,
-  };
-}
-
-function perturbParams(base: PolicyParams): PolicyParams {
-  const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
-  return {
-    demandWeight: clamp(base.demandWeight + (Math.random() - 0.5) * 0.4, 0.6, 1.6),
-    energyWeight: clamp(base.energyWeight + (Math.random() - 0.5) * 0.2, 0.1, 0.5),
-    chargeThreshold: clamp(base.chargeThreshold + (Math.random() - 0.5) * 0.1, 0.2, 0.6),
-    exploration: clamp(base.exploration + (Math.random() - 0.5) * 0.08, 0, 0.25),
-  };
-}
-
+const EUROPE_ROADMAP = [
+  {
+    stage: "Testbed",
+    headline: "Ingolstadt twin is up and streaming.",
+    detail: "Four corridors, 120 AVs, and charging load already feed this layout—the exact setup the jury will see first.",
+    stamp: "Now",
+  },
+  {
+    stage: "Showcase",
+    headline: "Public demos let anyone rerun the twin",
+    detail: "Stakeholders can flip policies, re-run the optimizer, and watch the numbers update on the main screen in real time.",
+    stamp: "20 Nov 2025",
+  },
+  {
+    stage: "Expansion",
+    headline: "Next cities plug in without redesign.",
+    detail: "Drop in corridor and depot data from Antwerp, Lyon, or Hamburg and the same workflow highlights their fleet plan overnight.",
+    stamp: "Q1 2026",
+  },
+];
 export function HomeDashboard({ revealed }: { revealed?: boolean }) {
   const { routes, plan, fetchedAt, loading, error, refresh } = useIngolstadtRoutes(90000);
   const { data: trafficData, loading: trafficLoading, error: trafficError, refresh: refreshTraffic } = useTrafficInsights();
@@ -157,10 +62,27 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
   const [lastRun, setLastRun] = useState<string | undefined>(undefined);
   const [showMetrics, setShowMetrics] = useState(false);
   const [hasRun, setHasRun] = useState(false);
-  const [rlMetrics, setRlMetrics] = useState<RLMetrics | null>(null);
+  const [rlMetrics, setRlMetrics] = useState<EpisodeMetrics | null>(null);
+  const [epochHistory, setEpochHistory] = useState<EpisodeMetrics[]>([]);
+  const [stepInsights, setStepInsights] = useState<StepInsight[] | null>(null);
+  const [bestParams, setBestParams] = useState<PolicyParams>({ ...BASE_POLICY_PARAMS });
   const showMap = revealed ?? true;
+  const optimizerPanelRef = useRef<HTMLDivElement | null>(null);
+  const overlayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showOptimizerStatus, setShowOptimizerStatus] = useState(false);
 
-  const bestParamsRef = useRef<PolicyParams>(BASE_PARAMS);
+  const scrollToOptimizer = useCallback(() => {
+    if (optimizerPanelRef.current) {
+      optimizerPanelRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, []);
+
+  const topRoutes = useMemo(() => {
+    if (!routes.length) return [] as RouteDetails[];
+    return [...routes].sort((a, b) => (b.delayTime ?? 0) - (a.delayTime ?? 0));
+  }, [routes]);
+
+  const bestParamsRef = useRef<PolicyParams>(BASE_POLICY_PARAMS);
   const bestRewardRef = useRef<number>(-Infinity);
   const cancelRef = useRef(false);
   const epochTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -176,6 +98,40 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
     return weights;
   }, [trafficData]);
 
+  const trafficSegmentsForMap = useMemo(() => {
+    if (!trafficData?.topSegments?.length) return [] as {
+      id: string;
+      coordinates: [number, number][];
+      delayIndex: number | null;
+      streetName: string;
+    }[];
+    return trafficData.topSegments
+      .map((segment) => {
+        const geometry = segment.geometry;
+        if (!geometry || geometry.type !== "LineString" || !Array.isArray(geometry.coordinates)) return null;
+        const coordinates = geometry.coordinates
+          .map((coord) => {
+            if (!Array.isArray(coord) || coord.length < 2) return null;
+            const [lon, lat] = coord;
+            return [lon, lat] as [number, number];
+          })
+          .filter((point): point is [number, number] => Boolean(point));
+        if (!coordinates.length) return null;
+        return {
+          id: segment.id,
+          coordinates,
+          delayIndex: segment.delayIndex ?? null,
+          streetName: segment.streetName ?? "Segment",
+        };
+      })
+      .filter((feature): feature is {
+        id: string;
+        coordinates: [number, number][];
+        delayIndex: number | null;
+        streetName: string;
+      } => Boolean(feature));
+  }, [trafficData]);
+
   const onRun = useCallback(async () => {
     setEpoch(0);
     setReward(0);
@@ -186,9 +142,20 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
     setShowMetrics(true);
     setHasRun(true);
     cancelRef.current = false;
-    bestParamsRef.current = BASE_PARAMS;
+    bestParamsRef.current = BASE_POLICY_PARAMS;
     bestRewardRef.current = -Infinity;
     setRlMetrics(null);
+    setEpochHistory([]);
+    setStepInsights(null);
+    setBestParams({ ...BASE_POLICY_PARAMS });
+    setShowOptimizerStatus(true);
+    if (overlayTimerRef.current) {
+      clearTimeout(overlayTimerRef.current);
+      overlayTimerRef.current = null;
+    }
+    requestAnimationFrame(() => {
+      scrollToOptimizer();
+    });
 
     if (epochTimerRef.current) {
       clearTimeout(epochTimerRef.current);
@@ -203,35 +170,73 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
 
     const fleetSize = plan.recommendedFleetSize ?? 120;
 
-    const runEpoch = (index: number) => {
+    const runEpoch = async (index: number): Promise<void> => {
       if (cancelRef.current) return;
-      const candidate = index === 0 ? BASE_PARAMS : perturbParams(bestParamsRef.current);
-      const result = simulateEpisode(candidate, fleetSize, STEPS_PER_EPOCH);
+      const candidate = index === 0 ? BASE_POLICY_PARAMS : perturbParams(bestParamsRef.current);
+      let result: EpisodeMetrics;
+      try {
+        result = await requestEpisode(candidate, {
+          fleetSize,
+          steps: STEPS_PER_EPOCH,
+          captureSteps: index === 0 || index === EPOCH_COUNT - 1,
+          retrain: index > 0,
+        });
+      } catch (error) {
+        console.warn("RL service unavailable, using fallback", error);
+        result = simulateEpisode(candidate, {
+          fleetSize,
+          steps: STEPS_PER_EPOCH,
+          captureSteps: index === 0 || index === EPOCH_COUNT - 1,
+        });
+      }
       setRlMetrics(result);
+      setEpochHistory((prev) => {
+        const next = [...prev, result];
+        return next.slice(-EPOCH_COUNT);
+      });
+      if (result.steps && result.steps.length > 0) {
+        setStepInsights([...result.steps]);
+      }
 
       const totalTrips = result.served + result.unmet;
       const reliability = totalTrips > 0 ? (result.served / totalTrips) * 100 : 0;
       setEpoch(index + 1);
       setReward(result.rewardAvg);
       setLog(
-        `Epoch ${index + 1}: avg reward ${result.rewardAvg.toFixed(2)}, reliability ${reliability.toFixed(1)}%, served ${result.served} rides`
+        [
+          `Epoch ${index + 1} / ${EPOCH_COUNT}`,
+          `reward_avg: ${result.rewardAvg.toFixed(2)}`,
+          `served: ${result.served} · unmet: ${result.unmet}`,
+          `energy_cost: €${result.energyCost.toFixed(2)}`,
+          `reliability: ${reliability.toFixed(1)}%`,
+        ].join("\n")
       );
 
       if (result.rewardTotal > bestRewardRef.current) {
         bestRewardRef.current = result.rewardTotal;
         bestParamsRef.current = candidate;
+        setBestParams({ ...candidate });
       }
 
       if (index + 1 < EPOCH_COUNT && !cancelRef.current) {
-        epochTimerRef.current = setTimeout(() => runEpoch(index + 1), 350);
+        await new Promise<void>((resolve) => {
+          epochTimerRef.current = setTimeout(() => resolve(), 300);
+        });
+        await runEpoch(index + 1);
       } else {
         setIsRunning(false);
         setLastRun(new Date().toISOString());
+        const bestSummary = `Best reward_total: ${bestRewardRef.current.toFixed(2)} with demand_weight ${bestParamsRef.current.demandWeight.toFixed(2)}`;
+        setLog((prev) => `${prev}\n${bestSummary}`);
+        overlayTimerRef.current = setTimeout(() => {
+          setShowOptimizerStatus(false);
+          overlayTimerRef.current = null;
+        }, 3200);
       }
     };
 
-    runEpoch(0);
-  }, [refresh, refreshTraffic, plan]);
+    void runEpoch(0);
+  }, [refresh, refreshTraffic, plan, scrollToOptimizer]);
 
   useEffect(() => {
     const handler = () => onRun();
@@ -261,6 +266,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
     return () => {
       cancelRef.current = true;
       if (epochTimerRef.current) clearTimeout(epochTimerRef.current);
+      if (overlayTimerRef.current) clearTimeout(overlayTimerRef.current);
     };
   }, []);
 
@@ -270,15 +276,19 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
 
     const totalTrips = rlMetrics.served + rlMetrics.unmet;
     const reliability = totalTrips > 0 ? Number(((rlMetrics.served / totalTrips) * 100).toFixed(1)) : plan.serviceReliability;
-    const baselineReliability = plan.serviceReliability;
+    const baselineReliability = plan.serviceReliability ?? 75;
     const reliabilityBoost = reliability - baselineReliability;
 
+    const baselineEnergyKwh = plan.energyPerRideKwh ?? 0.6;
     const energyPerRideKwh = rlMetrics.served
-      ? Number(((rlMetrics.energyCost / Math.max(rlMetrics.served, 1)) / AVG_ENERGY_PRICE).toFixed(2))
+      ? Number(((rlMetrics.energyCost / Math.max(rlMetrics.served, 1)) / AVERAGE_ENERGY_PRICE).toFixed(2))
       : plan.energyPerRideKwh;
 
-    const gridStress = Number((Math.max(10, plan.gridStressIndex - Math.max(0, reliabilityBoost))).toFixed(1));
-    const rewardScore = Number((reliability - 0.6 * gridStress - 0.2 * (100 - reliability)).toFixed(1));
+    const baselineGridStress = plan.gridStressIndex && plan.gridStressIndex > 0 ? plan.gridStressIndex : 38;
+    const energyDelta = baselineEnergyKwh - (energyPerRideKwh ?? baselineEnergyKwh);
+    const gridStressRaw = baselineGridStress - energyDelta * 24 - reliabilityBoost * 0.45;
+    const gridStress = Number(Math.max(6, gridStressRaw).toFixed(1));
+    const rewardScore = Number((reliability - 0.5 * gridStress - 0.25 * (100 - reliability)).toFixed(1));
 
     const redistributed = plan.hotspots.map((hotspot, index) => {
       const scale = 1 + (reliabilityBoost / 100) * (0.6 + index * 0.08);
@@ -309,9 +319,11 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
     const totalTrips = rlMetrics.served + rlMetrics.unmet;
     const reliability = totalTrips > 0 ? (rlMetrics.served / totalTrips) * 100 : 0;
     const energyPerRide = rlMetrics.served
-      ? (rlMetrics.energyCost / Math.max(rlMetrics.served, 1)) / AVG_ENERGY_PRICE
+      ? (rlMetrics.energyCost / Math.max(rlMetrics.served, 1)) / AVERAGE_ENERGY_PRICE
       : plan.energyPerRideKwh;
-    const gridRelief = plan.gridStressIndex - (dynamicPlan?.gridStressIndex ?? plan.gridStressIndex);
+    const baselineGridStress = plan.gridStressIndex && plan.gridStressIndex > 0 ? plan.gridStressIndex : 38;
+    const currentStress = dynamicPlan?.gridStressIndex ?? baselineGridStress;
+    const gridRelief = baselineGridStress - currentStress;
     return {
       reliability,
       energyPerRide,
@@ -324,42 +336,208 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
     };
   }, [plan, rlMetrics, dynamicPlan]);
 
+  const headlineStats = useMemo(() => {
+    const targetPlan = dynamicPlan ?? plan ?? null;
+    if (!targetPlan) {
+      return [] as {
+        label: string;
+        value: string;
+        detail: string;
+        delta?: string | null;
+        mood?: "positive" | "negative" | "neutral";
+      }[];
+    }
+    const cards: {
+      label: string;
+      value: string;
+      detail: string;
+      delta?: string | null;
+      mood?: "positive" | "negative" | "neutral";
+    }[] = [];
+    const reliability = targetPlan.serviceReliability ?? 0;
+    const gridStress = targetPlan.gridStressIndex ?? 0;
+    const energy = targetPlan.energyPerRideKwh ?? 0;
+    const rewardScore = targetPlan.rewardScore ?? 0;
+    const baselineReliability = plan?.serviceReliability ?? reliability;
+    const baselineEnergy = plan?.energyPerRideKwh ?? energy;
+    const baselineStress = plan?.gridStressIndex ?? 38;
+    const baselineReward = plan?.rewardScore ?? rewardScore;
+    cards.push({
+      label: "Reliability",
+      value: `${reliability.toFixed(1)}%`,
+      detail: "Share of rides served across the twin",
+      delta: `${(reliability - baselineReliability).toFixed(1)}% vs baseline`,
+      mood: reliability - baselineReliability >= 0 ? "positive" : "negative",
+    });
+    cards.push({
+      label: "Energy per ride",
+      value: `${energy.toFixed(2)} kWh`,
+      detail: "Average energy draw per completed trip",
+      delta: `${(baselineEnergy - energy).toFixed(2)} kWh saved`,
+      mood: baselineEnergy - energy >= 0 ? "positive" : "negative",
+    });
+    cards.push({
+      label: "Grid stress",
+      value: `${gridStress.toFixed(1)} pts`,
+      detail: "Composite feeder & depot loading index",
+      delta: `${(baselineStress - gridStress).toFixed(1)} pts relieved`,
+      mood: baselineStress - gridStress >= 0 ? "positive" : "negative",
+    });
+    cards.push({
+      label: "Reward score",
+      value: rewardScore.toFixed(1),
+      detail: "Weighted reliability – energy – equity mix",
+      delta: `${(rewardScore - baselineReward).toFixed(1)} uplift`,
+      mood: "neutral",
+    });
+    return cards;
+  }, [dynamicPlan, plan]);
+
+  const blueprintStats = useMemo(() => {
+    const sourcePlan = dynamicPlan ?? plan ?? null;
+    if (!sourcePlan) return [] as { label: string; value: string; detail: string }[];
+    const fleet = sourcePlan.recommendedFleetSize ?? plan?.recommendedFleetSize ?? 120;
+    const corridors = Array.isArray(sourcePlan.hotspots) ? sourcePlan.hotspots.length : plan?.hotspots?.length ?? 0;
+    const reliability = sourcePlan.serviceReliability ?? plan?.serviceReliability ?? 0;
+    const energy = sourcePlan.energyPerRideKwh ?? plan?.energyPerRideKwh ?? 0.6;
+
+    return [
+      {
+        label: "Fleet scale",
+        value: `${fleet} AVs ready`,
+        detail: "Right-sized for Ingolstadt and easy to adjust for the next city.",
+      },
+      {
+        label: "Corridors mapped",
+        value: `${corridors} priority lanes`,
+        detail: "Each corridor connects to the optimizer with the same data hooks.",
+      },
+      {
+        label: "Reliability",
+        value: `${reliability.toFixed(1)}% served`,
+        detail: "Trips the fleet handles after the optimizer settles in.",
+      },
+      {
+        label: "Energy discipline",
+        value: `${energy.toFixed(2)} kWh/ride`,
+        detail: "Average energy draw per ride keeps the grid story believable.",
+      },
+    ];
+  }, [dynamicPlan, plan]);
+
+  const currentReliability = useMemo(() => {
+    if (rlSummary) return rlSummary.reliability;
+    if (dynamicPlan?.serviceReliability) return dynamicPlan.serviceReliability;
+    if (plan?.serviceReliability) return plan.serviceReliability;
+    return null;
+  }, [rlSummary, dynamicPlan, plan]);
+
+  const currentEnergyPerRide = useMemo(() => {
+    if (rlSummary) return rlSummary.energyPerRide;
+    if (dynamicPlan?.energyPerRideKwh) return dynamicPlan.energyPerRideKwh;
+    if (plan?.energyPerRideKwh) return plan.energyPerRideKwh;
+    return null;
+  }, [rlSummary, dynamicPlan, plan]);
+
+  const currentGridChange = useMemo(() => {
+    if (typeof rlSummary?.gridRelief === "number") return rlSummary.gridRelief;
+    return null;
+  }, [rlSummary]);
+
   return (
     <div className="flex flex-col gap-12">
+      {showOptimizerStatus && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="pointer-events-auto fixed bottom-6 left-1/2 z-50 w-[min(340px,calc(100vw-2rem))] -translate-x-1/2 rounded-3xl border border-white/15 bg-neutral-950/85 p-5 text-white shadow-2xl shadow-emerald-500/20 backdrop-blur-lg sm:bottom-auto sm:left-auto sm:right-8 sm:top-28 sm:translate-x-0"
+        >
+          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-200/80">
+            <span>{isRunning ? "Optimizer running" : "Optimizer summary"}</span>
+            <span>
+              Epoch {Math.min(epoch, EPOCH_COUNT)}/{EPOCH_COUNT}
+            </span>
+          </div>
+          <div className="mt-3 space-y-2 text-sm text-white/85">
+            {typeof currentReliability === "number" && (
+              <div className="flex items-center justify-between">
+                <span>Reliability</span>
+                <span>{currentReliability.toFixed(1)}%</span>
+              </div>
+            )}
+            {typeof currentEnergyPerRide === "number" && (
+              <div className="flex items-center justify-between">
+                <span>Energy / ride</span>
+                <span>{currentEnergyPerRide.toFixed(2)} kWh</span>
+              </div>
+            )}
+            {typeof currentGridChange === "number" && (
+              <div className="flex items-center justify-between">
+                <span>Grid change</span>
+                <span className={currentGridChange >= 0 ? "text-emerald-200" : "text-rose-200"}>
+                  {currentGridChange >= 0 ? "↓ " : "↑ "}
+                  {Math.abs(currentGridChange).toFixed(1)} pts
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between">
+              <span>Reward avg</span>
+              <span>{reward.toFixed(1)}</span>
+            </div>
+          </div>
+          <button
+            onClick={scrollToOptimizer}
+            className="mt-4 w-full rounded-full bg-emerald-500 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.35em] text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-400"
+          >
+            Jump to live panel
+          </button>
+        </motion.div>
+      )}
+
       <section>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-6 flex flex-col gap-4 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 md:flex-row md:items-center md:justify-between"
+          className="relative mb-6 overflow-hidden rounded-3xl border border-neutral-200 bg-gradient-to-br from-white/90 via-white/70 to-white/50 p-6 shadow-xl shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:from-neutral-950/90 dark:via-neutral-950/70 dark:to-neutral-950/50"
         >
-          <div>
-            <h2 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100">City twin</h2>
-            <p className="text-sm text-neutral-600 dark:text-neutral-300">
-              The dashboard streams TomTom corridor intelligence, adds fleet and energy heuristics, and serves up an Ingolstadt-ready AV plan.
-            </p>
-          </div>
-          <div className="flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
-            <button
-              onClick={onRun}
-              disabled={loading || isRunning}
-              className="rounded-full bg-emerald-600 px-4 py-2 font-semibold text-white shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5 hover:bg-emerald-500 disabled:opacity-60"
-            >
-              {isRunning ? "Optimizing…" : "Run Optimization"}
-            </button>
-            <span>Updated {fetchedAt ? new Date(fetchedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}</span>
-            {lastRun && <span>Last run {new Date(lastRun).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>}
-            {error && <span className="text-rose-500">· API fallback: {error}</span>}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(20,90,70,0.18),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(70,100,255,0.18),_transparent_55%)]" />
+          <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-xl">
+              <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">System overview</p>
+              <h2 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50 sm:text-3xl">Ingolstadt autonomy control room</h2>
+              <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
+                Everything is grouped for quick understanding: live map on the left, optimizer activity on the right, and headline metrics in the middle so anyone can follow the impact in seconds.
+              </p>
+            </div>
+            <div className="flex flex-col items-start gap-3 text-xs text-neutral-500 dark:text-neutral-400 sm:flex-row sm:items-center">
+              <button
+                onClick={onRun}
+                disabled={loading || isRunning}
+                className="rounded-full bg-emerald-600 px-5 py-3 font-semibold text-white shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5 hover:bg-emerald-500 disabled:opacity-60"
+              >
+                {isRunning ? "Optimizing…" : "Run the optimizer"}
+              </button>
+              <div className="flex flex-col items-start gap-1 sm:items-end">
+                <span>Updated {fetchedAt ? new Date(fetchedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}</span>
+                {lastRun && <span>Last run {new Date(lastRun).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>}
+                {error && <span className="text-rose-500">API fallback: {error}</span>}
+              </div>
+            </div>
           </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,340px)]">
+        <ExperienceStrip className="mb-6" />
+
+        <div className="flex flex-col gap-4">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 30 }}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-neutral-200 shadow-xl dark:border-neutral-800"
+            className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-950 shadow-2xl shadow-neutral-900/30 dark:border-neutral-800"
           >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]" />
             {(!showMap || loading) && (
               <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-neutral-100 via-neutral-50 to-neutral-100 text-neutral-500 animate-pulse dark:from-neutral-900 dark:via-neutral-950 dark:to-neutral-900 dark:text-neutral-400">
                 Preparing city twin…
@@ -371,25 +549,109 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
                 loading={loading}
                 showLegend
                 trafficWeights={trafficWeights}
+                trafficSegments={trafficSegmentsForMap}
               />
             )}
           </motion.div>
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+            <motion.div
+              ref={optimizerPanelRef}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: revealed ? 1 : 0, x: revealed ? 0 : -20 }}
+              transition={{ duration: 0.7, delay: 0.05, ease: "easeOut" }}
+            >
+              <RLSidePanel
+                epoch={epoch}
+                reward={reward}
+                log={log}
+                routes={routes}
+                isRunning={isRunning}
+                hasRun={hasRun}
+                plan={dynamicPlan ?? plan ?? null}
+                basePlan={plan}
+                summary={rlSummary}
+                timeline={dynamicPlan?.demandTimeline ?? rlMetrics?.timeline ?? null}
+                params={bestParams}
+                baselineParams={BASE_POLICY_PARAMS}
+                steps={stepInsights}
+                history={epochHistory}
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: revealed ? 1 : 0, x: revealed ? 0 : 20 }}
+              transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+              className="flex flex-col gap-5 rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80"
+            >
+              <div>
+                <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">City baseline</h3>
+                <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Reliability, energy, grid stress, and reward move here as soon as the optimizer runs.</p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
+                  {headlineStats.map((card) => (
+                    <div
+                      key={card.label}
+                      className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-white via-white/90 to-white/70 p-4 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900/70 dark:to-neutral-900/60"
+                    >
+                      <div className="text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">{card.label}</div>
+                      <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50">{card.value}</div>
+                      <div className="text-xs text-neutral-500 dark:text-neutral-400">{card.detail}</div>
+                      {card.delta && (
+                        <div
+                          className={`mt-2 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest ${
+                            card.mood === "positive"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200"
+                              : card.mood === "negative"
+                                ? "bg-rose-500/10 text-rose-600 dark:bg-rose-500/10 dark:text-rose-200"
+                                : "bg-neutral-200/60 text-neutral-600 dark:bg-neutral-800/60 dark:text-neutral-300"
+                          }`}
+                        >
+                          {card.delta}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">Corridors in focus</h4>
+                <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">These are the three corridors with the highest delay right now.</p>
+                <div className="mt-3 space-y-3">
+                  {topRoutes.slice(0, 3).map((route) => (
+                    <div
+                      key={route.routeId}
+                      className="rounded-xl border border-neutral-200 bg-white/75 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900/70"
+                    >
+                      <div className="flex items-center justify-between text-sm font-semibold text-neutral-800 dark:text-neutral-100">
+                        <span>{route.routeName}</span>
+                        <span className="text-xs uppercase tracking-widest text-rose-500 dark:text-rose-300">Delay {(route.delayTime ?? 0).toFixed(0)}s</span>
+                      </div>
+                      {route.area && <p className="text-xs text-neutral-500 dark:text-neutral-400">{route.area}</p>}
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                        <span>Typical {Math.round((route.typicalTravelTime ?? 0) / 60)} min</span>
+                        <span>Length {((route.routeLength ?? 0) / 1000).toFixed(1)} km</span>
+                        <span>Speed gap {(((route.routeLength ?? 0) / Math.max(route.travelTime ?? 1, 1)) * 3.6).toFixed(1)} km/h</span>
+                      </div>
+                    </div>
+                  ))}
+                  {topRoutes.length === 0 && (
+                    <div className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50/80 p-4 text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-400">
+                      Corridor stats will load once the TomTom feed responds.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: revealed ? 1 : 0, x: revealed ? 0 : 30 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 30 }}
+            transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
           >
-            <RLSidePanel
-              epoch={epoch}
-              reward={reward}
-              log={log}
-              routes={routes}
-              isRunning={isRunning}
-              hasRun={hasRun}
-              plan={dynamicPlan ?? plan ?? null}
-              basePlan={plan}
-              summary={rlSummary}
-            />
+            <NeuralNetworkViz />
           </motion.div>
         </div>
 
@@ -403,17 +665,17 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             <div>
               <div className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Step 1</div>
               <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Run the optimizer</p>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Click “Run Optimization” to pull fresh delay data, train the policy, and write a new deployment recommendation.</p>
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">One click pulls new traffic data and lets the agent learn for a few quick epochs.</p>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Step 2</div>
               <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Explore the twin</p>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Use the heatmap to pick out AV pooling zones, charging depots, and slow corridors.</p>
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Hover the map to see which corridors are hurting and how depot load shifts.</p>
             </div>
             <div>
               <div className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Step 3</div>
-              <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Brief stakeholders</p>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Lean on the metric cards to explain delay cuts, minutes saved, and weekly CO₂ avoided.</p>
+              <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Explain what changed</p>
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Use the cards to call out reliability gain, energy saved, and grid relief in plain language.</p>
             </div>
           </motion.div>
         )}
@@ -432,6 +694,58 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           />
         </motion.div>
       </section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
+        transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+        className="relative overflow-hidden rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-xl shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80"
+      >
+        <div className="pointer-events-none absolute -left-32 top-1/2 h-64 w-64 -translate-y-1/2 rounded-full bg-emerald-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute right-[-20%] top-10 h-72 w-72 rounded-full bg-sky-400/15 blur-3xl" />
+        <div className="relative z-10 grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <div className="space-y-5">
+            <div>
+              <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">European rollout vision</p>
+              <h3 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50 sm:text-3xl">
+                From Ingolstadt sandbox to continental service
+              </h3>
+              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Swap the data feed for another city and the same layout updates—no slides to rebuild.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
+              {blueprintStats.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-neutral-200 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900/70"
+                >
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">{item.label}</div>
+                  <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50">{item.value}</div>
+                  <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-300">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            {EUROPE_ROADMAP.map((milestone, idx) => (
+              <motion.div
+                key={milestone.stage}
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="rounded-2xl border border-white/30 bg-gradient-to-br from-neutral-900/90 via-neutral-900/70 to-neutral-800/60 p-5 text-white shadow-lg shadow-neutral-900/40"
+              >
+                <div className="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/60">
+                  <span>{milestone.stage}</span>
+                  <span>{milestone.stamp}</span>
+                </div>
+                <h4 className="mt-3 text-lg font-semibold text-white/95">{milestone.headline}</h4>
+                <p className="mt-2 text-sm text-white/80">{milestone.detail}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
 
       <motion.section
         initial={{ opacity: 0, y: 40 }}

@@ -14,24 +14,6 @@ const heroStats = [
   { label: "Fewer vehicles", value: "-31", detail: "Route redesign lets AVs replace peak buses" },
 ] as const;
 
-const heroGallery = [
-  {
-    src: "/media/av-intersection.jpg",
-    alt: "Autonomous shuttles negotiating a connected intersection",
-    caption: "Intersections become choreographed lanes once telemetry feeds the orchestrator.",
-  },
-  {
-    src: "/media/av-fleet.jpg",
-    alt: "Autonomous fleet coverage illustrated across a busy avenue",
-    caption: "Halos highlight how the learner balances hotspots with standby vehicles.",
-  },
-  {
-    src: "/media/av-roundabout.jpg",
-    alt: "Autonomous vehicles coordinating at a roundabout",
-    caption: "Roundabouts calm when AVs share intent—grid stress drops alongside delay.",
-  },
-] as const;
-
 export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
   const scrollToTarget = useCallback(() => {
     const target = document.getElementById(scrollTargetId);
@@ -59,19 +41,18 @@ export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
       <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <div className="flex flex-col gap-6">
           <Reveal>
-            <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">Autonomous city twin</p>
+            <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">Autonomous mobility control room</p>
           </Reveal>
           <Reveal delay={0.08}>
             <h1 className="text-3xl font-semibold leading-tight text-neutral-900 dark:text-white sm:text-4xl">
-              Ingolstadt orchestrator: explainable reinforcement learning for city corridors
+              Ingolstadt Orchestrator
             </h1>
           </Reveal>
           <RevealStack
             initialDelay={0.14}
             items={[
               <p className="text-sm leading-6 text-neutral-600 dark:text-neutral-300 sm:text-base" key="intro">
-                The homepage now drops you straight into the experience: live city telemetry, a reinforcement learner tuning in the background,
-                and graphics that make the strategy obvious on any screen. No gimmicks—just the knobs you can turn and the proof that they work.
+                Live telemetry, reinforcement learning, and charging strategy in one view—ready for stakeholders, not slides.
               </p>,
             ]}
           />
@@ -107,33 +88,22 @@ export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
             </button>
           </Reveal>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Reveal className="col-span-2">
-            <figure className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-800/10 shadow-lg shadow-neutral-900/20 dark:border-neutral-700 dark:bg-neutral-900/60 dark:shadow-neutral-900/40">
-              <Image
-                src="/media/av-corridor.jpg"
-                alt="Autonomous vehicles cruising through a connected corridor in Ingolstadt"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 90vw, 540px"
-                priority
-              />
-              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral-950/70 via-neutral-950/10 to-transparent px-5 pb-4 pt-16 text-sm text-white">
-                Live telemetry shows how the orchestrator stages AVs along Ingolstadt’s busiest corridor.
-              </figcaption>
-            </figure>
-          </Reveal>
-          {heroGallery.map((image, index) => (
-            <Reveal key={image.src} delay={0.1 * (index + 1)}>
-              <figure className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-800/10 shadow-lg shadow-neutral-900/20 dark:border-neutral-700 dark:bg-neutral-900/60 dark:shadow-neutral-900/40">
-                <Image src={image.src} alt={image.alt} fill className="object-cover" sizes="260px" />
-                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral-950/70 via-neutral-950/10 to-transparent px-4 pb-3 pt-10 text-[11px] text-white">
-                  {image.caption}
-                </figcaption>
-              </figure>
-            </Reveal>
-          ))}
-        </div>
+        <Reveal>
+          <figure className="relative aspect-[5/4] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-800/10 shadow-lg shadow-neutral-900/20 dark:border-neutral-700 dark:bg-neutral-900/60 dark:shadow-neutral-900/40">
+            <Image
+              src="/media/ingolstadt-traffic.jpg"
+              alt="Live TomTom telemetry across central Ingolstadt"
+              fill
+              className="object-cover"
+              sizes="(max-width: 1024px) 90vw, 540px"
+              priority
+            />
+            <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/10 to-transparent px-5 pb-4 pt-16 text-sm text-white">
+              <span className="block font-medium">Live telemetry shows how the orchestrator stages AVs along Ingolstadt&apos;s busiest corridor.</span>
+              <span className="mt-1 block text-[13px] text-white/80">Roundabouts calm when AVs share intent—grid stress drops alongside delay.</span>
+            </figcaption>
+          </figure>
+        </Reveal>
       </div>
     </section>
   );

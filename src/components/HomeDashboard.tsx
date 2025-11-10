@@ -12,6 +12,7 @@ import { TrafficInsights } from "@/components/TrafficInsights";
 import { ExperienceStrip } from "@/components/ExperienceStrip";
 import { NeuralNetworkViz } from "@/components/NeuralNetworkViz";
 import { CongestionStory } from "@/components/CongestionStory";
+import { DataSources } from "@/components/DataSources";
 import {
   simulateEpisode,
   perturbParams,
@@ -670,6 +671,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               refresh={refreshTraffic}
             />
           </motion.div>
+          <DataSources />
         </div>
       </section>
 

@@ -24,6 +24,7 @@ export type TrafficResponse = {
   network: unknown;
   sampleSize: number;
   topSegments: TrafficSegment[];
+  allSegments?: TrafficSegment[];
 };
 
 export function useTrafficInsights() {

@@ -101,13 +101,15 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
   }, [trafficData]);
 
   const trafficSegmentsForMap = useMemo(() => {
-    if (!trafficData?.topSegments?.length) return [] as {
+    // Use allSegments if available (shows full network), otherwise fall back to topSegments
+    const segments = trafficData?.allSegments?.length ? trafficData.allSegments : trafficData?.topSegments ?? [];
+    if (!segments.length) return [] as {
       id: string;
       coordinates: [number, number][];
       delayIndex: number | null;
       streetName: string;
     }[];
-    return trafficData.topSegments
+    return segments
       .map((segment) => {
         const geometry = segment.geometry;
         if (!geometry || geometry.type !== "LineString" || !Array.isArray(geometry.coordinates)) return null;

@@ -163,23 +163,28 @@ export async function GET() {
       };
     });
 
-    const topByDelay = mapped
+    const citySegments = mapped
       .filter((item) => {
         // Only include city segments (speed limit ≤ 70 km/h to exclude highways)
         if (!item.speedLimit || item.speedLimit > 70) return false;
         if (typeof item.delayIndex !== "number") return false;
         // Must have reasonable sample size
         if (!item.sampleSize || item.sampleSize < 100) return false;
+        // Must have geometry to display on map
+        if (!item.geometry) return false;
         return true;
       })
-      .sort((a, b) => (b.delayIndex ?? 0) - (a.delayIndex ?? 0))
-      .slice(0, 10);
+      .sort((a, b) => (b.delayIndex ?? 0) - (a.delayIndex ?? 0));
+
+    // Return top 10 for cards, but all valid segments for map visualization
+    const topByDelay = citySegments.slice(0, 10);
 
     return NextResponse.json({
       fetchedAt: new Date().toISOString(),
       network: (payload as TomTomPayload)?.network ?? null,
       sampleSize: mapped.length,
       topSegments: topByDelay,
+      allSegments: citySegments, // Send all city segments for map visualization
     });
   } catch (error) {
     console.error("traffic stats error", error);

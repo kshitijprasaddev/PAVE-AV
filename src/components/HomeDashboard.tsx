@@ -512,7 +512,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               </Reveal>
               <Reveal delay={0.14}>
                 <p className="mt-4 text-sm leading-relaxed text-neutral-300 sm:text-base">
-                  Watch live traffic, adjust the reinforcement learning policy, and see fleet deployment recommendations update instantly. Click "Run the optimizer" to start.
+                  Watch live traffic, adjust the reinforcement learning policy, and see fleet deployment recommendations update instantly. Click &quot;Run the optimizer&quot; to start.
                 </p>
               </Reveal>
             </div>

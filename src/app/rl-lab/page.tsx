@@ -357,18 +357,18 @@ export default function RLLabPage() {
   const processStages = [
     {
       title: "Ingest",
-      icon: "🛰️",
       text: "Pull TomTom corridor delays, stop-level demand priors, and grid availability.",
+      color: "emerald",
     },
     {
       title: "Simulate",
-      icon: "🧠",
       text: "Run 180 reinforcement-learning ticks across three policy variants and the baseline to compare reward and reliability.",
+      color: "sky",
     },
     {
       title: "Deploy",
-      icon: "🚐",
       text: "Write the updated hotspot plan, highlighting charging windows and spare capacity for the pitch deck.",
+      color: "violet",
     },
   ];
 
@@ -412,13 +412,32 @@ export default function RLLabPage() {
         transition={{ duration: 0.6, delay: 0.05 }}
         className="mt-8 grid gap-4 rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 sm:grid-cols-3"
       >
-        {processStages.map((stage) => (
-          <div key={stage.title} className="flex flex-col gap-2 rounded-2xl border border-neutral-200 bg-white/70 p-4 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-300">
-            <span className="text-2xl" aria-hidden>{stage.icon}</span>
-            <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{stage.title}</h3>
-            <p>{stage.text}</p>
-          </div>
-        ))}
+        {processStages.map((stage, idx) => {
+          const colorClasses = {
+            emerald: "from-emerald-500/20 to-emerald-600/10 border-emerald-500/30",
+            sky: "from-sky-500/20 to-sky-600/10 border-sky-500/30",
+            violet: "from-violet-500/20 to-violet-600/10 border-violet-500/30",
+          };
+          const textColorClasses = {
+            emerald: "text-emerald-400",
+            sky: "text-sky-400",
+            violet: "text-violet-400",
+          };
+          return (
+            <div
+              key={stage.title}
+              className={`flex flex-col gap-3 rounded-2xl border bg-gradient-to-br p-5 text-sm shadow-lg backdrop-blur ${colorClasses[stage.color as keyof typeof colorClasses]} dark:border-neutral-800/50 dark:bg-neutral-900/60`}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-lg font-bold ${textColorClasses[stage.color as keyof typeof textColorClasses]}`}>
+                  {idx + 1}
+                </div>
+                <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{stage.title}</h3>
+              </div>
+              <p className="text-neutral-600 dark:text-neutral-300">{stage.text}</p>
+            </div>
+          );
+        })}
       </motion.section>
 
       <motion.section

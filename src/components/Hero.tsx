@@ -31,7 +31,7 @@ export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
           priority
           quality={95}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/60 via-neutral-950/50 to-neutral-950/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black" />
       </div>
 
       <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-8 px-6 text-center text-white">

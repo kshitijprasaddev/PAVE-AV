@@ -97,10 +97,10 @@ export function TrafficInsights({ data, loading, error, refresh }: Props) {
 
                     <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-neutral-400">
                       <div>
-                        <span className="text-neutral-500">Limit:</span> {segment.speedLimit ?? "—"} km/h
+                        <span className="text-neutral-500">Limit:</span> {segment.speedLimit ?? "..."} km/h
                       </div>
                       <div>
-                        <span className="text-neutral-500">Actual:</span> {segment.harmonicAverageSpeed?.toFixed(0) ?? "—"} km/h
+                        <span className="text-neutral-500">Actual:</span> {segment.harmonicAverageSpeed?.toFixed(0) ?? "..."} km/h
                       </div>
                     </div>
                   </motion.div>

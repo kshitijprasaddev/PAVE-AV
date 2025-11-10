@@ -65,7 +65,7 @@ export function MissionStatement() {
               className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4 backdrop-blur"
             >
               <p className="text-sm leading-relaxed text-rose-200/90">
-                <strong className="text-rose-300">Our mission:</strong> Give planners a live twin that turns traffic data into actionable AV deployment plans—proving autonomous fleets can improve safety while reducing costs.
+                <strong className="text-rose-300">Our mission:</strong> Give planners a live twin that turns traffic data into actionable AV deployment plans (proving autonomous fleets can improve safety while reducing costs).
               </p>
             </motion.div>
           </div>

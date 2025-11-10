@@ -16,7 +16,7 @@ export function CongestionStory() {
         </svg>
       ),
       label: "Traffic builds up",
-      description: "Corridors like Audi Forum ↔ Hauptbahnhof see 90+ km/h slowdowns during peak hours.",
+      description: "Corridors like Audi Forum ↔ Hauptbahnhof slow to 15-20 km/h during peak hours (30-40 km/h below posted limits).",
       color: "rose",
     },
     {
@@ -58,7 +58,7 @@ export function CongestionStory() {
           From congestion data to deployment plan
         </h2>
         <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-neutral-300">
-          The reinforcement learning engine doesn&apos;t just show traffic—it solves it. Watch how raw delay data becomes a concrete AV rollout strategy.
+          The reinforcement learning engine doesn&apos;t just show traffic, it solves it. Watch how raw delay data becomes a concrete AV rollout strategy.
         </p>
       </motion.div>
 
@@ -105,12 +105,12 @@ export function CongestionStory() {
         transition={{ duration: 0.8, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="mt-8 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 backdrop-blur"
       >
-        <p className="text-sm font-semibold text-violet-300">Reading the map below:</p>
+        <p className="text-sm font-semibold text-violet-300">Reading the map above:</p>
         <ul className="mt-3 space-y-2 text-sm leading-relaxed text-violet-200/80">
-          <li>• <strong>Yellow/red glowing lines</strong> = congested corridors (the thicker the line, the worse the delay)</li>
-          <li>• <strong>Blue heat patches</strong> = high rider demand zones (where people are waiting)</li>
-          <li>• <strong>Green depot markers</strong> = charging hubs the RL policy uses to balance energy costs</li>
-          <li>• <strong>White highlighted path</strong> = selected corridor you clicked in the traffic cards</li>
+          <li>• <strong>Yellow/red glowing lines</strong> on the Ingolstadt map show congested corridors (thicker = worse delay)</li>
+          <li>• <strong>Blue heat patches</strong> mark high rider demand zones (where people are waiting)</li>
+          <li>• <strong>Green depot markers</strong> show charging hubs the RL policy uses to balance energy costs</li>
+          <li>• The traffic cards below reveal segment-level congestion stats from August 2024 TomTom data</li>
         </ul>
       </motion.div>
     </section>

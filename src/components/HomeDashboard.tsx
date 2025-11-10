@@ -639,11 +639,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               plan={dynamicPlan ?? plan ?? null}
               basePlan={plan}
               summary={rlSummary}
-              timeline={dynamicPlan?.demandTimeline ?? rlMetrics?.timeline ?? null}
-              params={bestParams}
-              baselineParams={BASE_POLICY_PARAMS}
-              steps={stepInsights}
-              history={epochHistory}
+              gridRelief={rlSummary?.gridRelief ?? null}
             />
           </motion.div>
 

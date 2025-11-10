@@ -847,84 +847,124 @@ export default function RLLabPage() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.16 }}
-        className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
+        className="mt-10 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80"
       >
-        <div className="rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Live hotspot overlay</h2>
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">The map below shows where the policy stages AVs. Glowing cells are the top demand zones.</p>
-          <div className="mt-4 aspect-[16/9]">
-            <DynamicIngolstadtMap
-              routes={routes}
-              loading={routesLoading || trafficLoading}
-              showLegend={false}
-              trafficWeights={trafficWeights}
-              trafficSegments={trafficSegmentsForMap}
-              selectedRouteId={resolvedSelectedRouteId}
-              onRouteSelect={(route) => setSelectedRouteId(route?.routeId ?? null)}
-            />
-          </div>
-          <div className="mt-3 rounded-2xl border border-neutral-200 bg-white/70 p-3 text-xs text-neutral-600 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-300">
-            <div className="grid gap-2 sm:grid-cols-3">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-4 rounded-full bg-gradient-to-r from-blue-100 via-blue-400 to-blue-700" />
-                <span>Demand heat</span>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Fleet deployment visualization</h2>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+            The map shows real Ingolstadt corridors. Below, the grid simulates how the policy positions vehicles across demand zones—hover cards to see coverage in action.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          <div>
+            <div className="aspect-[16/9] overflow-hidden rounded-2xl border border-neutral-200 shadow-sm dark:border-neutral-800">
+              <DynamicIngolstadtMap
+                routes={routes}
+                loading={routesLoading || trafficLoading}
+                showLegend={false}
+                trafficWeights={trafficWeights}
+                trafficSegments={trafficSegmentsForMap}
+                selectedRouteId={resolvedSelectedRouteId}
+                onRouteSelect={(route) => setSelectedRouteId(route?.routeId ?? null)}
+              />
+            </div>
+            <div className="mt-3 rounded-xl border border-neutral-200/70 bg-white/70 p-3 text-xs text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-300">
+              <div className="grid gap-2 sm:grid-cols-3">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-4 rounded-full bg-gradient-to-r from-blue-200 to-blue-600" />
+                  <span>Demand heat</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-1.5 w-5 rounded-full bg-gradient-to-r from-yellow-400 to-red-500" />
+                  <span>Congestion</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded bg-emerald-500" />
+                  <span>Charging depots</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="h-1.5 w-6 rounded-full bg-gradient-to-r from-yellow-400 to-red-600" />
-                <span>Congestion</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-sm bg-emerald-500" />
-                <span>Depots</span>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Grid simulation</h3>
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                Each cell represents a 500m × 500m zone. Vehicle icons show real-time policy decisions: blue = moving to demand, green = charging.
+              </p>
+              <div className="mt-3">
+                <CityGridSimulation
+                  cells={scenarioFrame.cells}
+                  gridWidth={gridWidth}
+                  gridHeight={gridHeight}
+                  maxPopulation={maxPopulation}
+                  activeHotspotId={activeHotspotId}
+                  topCells={topCells}
+                  onCellHover={(cellId) => {
+                    const idx = topCells.findIndex((c) => c.id === cellId);
+                    if (idx !== -1) setActiveHotspotIndex(idx);
+                  }}
+                  coverageForRank={coverageForRank}
+                />
               </div>
             </div>
           </div>
-          <h3 className="mt-6 text-base font-semibold text-neutral-900 dark:text-neutral-100">Simplified grid view</h3>
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Animated vehicles show policy actions in real time. Hover hotspot cards to highlight zones.</p>
-          <CityGridSimulation
-            cells={scenarioFrame.cells}
-            gridWidth={gridWidth}
-            gridHeight={gridHeight}
-            maxPopulation={maxPopulation}
-            activeHotspotId={activeHotspotId}
-            topCells={topCells}
-            onCellHover={(cellId) => {
-              const idx = topCells.findIndex((c) => c.id === cellId);
-              if (idx !== -1) setActiveHotspotIndex(idx);
-            }}
-            coverageForRank={coverageForRank}
-          />
-        </div>
 
-        <div className="space-y-4 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
-          <div>
-            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Top hotspots</h2>
-            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Hover to highlight zones on the grid.</p>
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Priority zones</h3>
+              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
+                These are the top 3 demand hotspots. Hover to see vehicle allocation on the grid.
+              </p>
+            </div>
+            {topCells.slice(0, 3).map((cell, index) => {
+              const isActive = cell.id === activeHotspotId;
+              const demandPercent = Math.round((cell.population / Math.max(maxPopulation, 1)) * 100);
+              return (
+                <motion.div
+                  key={cell.id}
+                  onMouseEnter={() => setActiveHotspotIndex(index)}
+                  className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-1"
+                  animate={{
+                    backgroundColor: isActive ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.8)",
+                    borderColor: isActive ? "rgba(16,185,129,0.6)" : "rgba(226,232,240,0.8)",
+                  }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                      Zone {cell.id}
+                    </div>
+                    <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-600">
+                      Rank {index + 1}
+                    </span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Rider demand</div>
+                      <div className="mt-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">{demandPercent}%</div>
+                    </div>
+                    <div>
+                      <div className="text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Fleet coverage</div>
+                      <div className="mt-1 text-xl font-semibold text-emerald-600 dark:text-emerald-400">{coverageForRank(index)} AVs</div>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
+                    Policy keeps {coverageForRank(index)} vehicles staged here during peak hours, repositioning to nearby chargers when energy prices spike.
+                  </p>
+                </motion.div>
+              );
+            })}
+
+            <div className="rounded-2xl border border-neutral-200/70 bg-gradient-to-br from-neutral-50 to-white p-4 text-xs text-neutral-600 shadow-sm dark:border-neutral-700 dark:from-neutral-900/60 dark:to-neutral-950/80 dark:text-neutral-300">
+              <p className="font-semibold text-neutral-700 dark:text-neutral-200">How it works</p>
+              <ul className="mt-2 space-y-1.5 text-[11px] leading-relaxed">
+                <li>• Brighter cells = higher rider demand</li>
+                <li>• Blue cars = moving toward demand</li>
+                <li>• Green cars = charging at depot</li>
+                <li>• AV count scales with zone priority</li>
+              </ul>
+            </div>
           </div>
-          {topCells.slice(0, 3).map((cell, index) => {
-            const isActive = cell.id === activeHotspotId;
-            return (
-              <motion.div
-                key={cell.id}
-                onMouseEnter={() => setActiveHotspotIndex(index)}
-                className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-1"
-                animate={{
-                  backgroundColor: isActive ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.7)",
-                  borderColor: isActive ? "rgba(16,185,129,0.5)" : "rgba(226,232,240,0.7)",
-                }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
-                  <span>Cell {cell.id}</span>
-                  <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-600">Rank {index + 1}</span>
-                </div>
-                <div className="mt-2 flex items-baseline gap-3 text-sm text-neutral-700 dark:text-neutral-200">
-                  <span><strong>{cell.population.toFixed(0)}</strong> pop</span>
-                  <span><strong>{coverageForRank(index)}</strong> AVs</span>
-                </div>
-              </motion.div>
-            );
-          })}
         </div>
       </motion.section>
 

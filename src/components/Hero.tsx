@@ -2,17 +2,11 @@
 
 import Image from "next/image";
 import { useCallback } from "react";
-import { Reveal, RevealStack } from "@/components/Reveal";
+import { motion } from "framer-motion";
 
 type HeroProps = {
   scrollTargetId?: string;
 };
-
-const heroStats = [
-  { label: "Reliability uplift", value: "+18%", detail: "Average gain versus legacy bus schedules" },
-  { label: "Energy saved", value: "22%", detail: "Fewer peak-tariff charges across the fleet" },
-  { label: "Fewer vehicles", value: "-31", detail: "Route redesign lets AVs replace peak buses" },
-] as const;
 
 export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
   const scrollToTarget = useCallback(() => {
@@ -26,84 +20,77 @@ export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
     scrollToTarget();
   }, [scrollToTarget]);
 
-  const handleExplore = useCallback(() => {
-    scrollToTarget();
-  }, [scrollToTarget]);
-
-  const handleRLLab = useCallback(() => {
-    window.location.href = "/rl-lab";
-  }, []);
-
   return (
-    <section className="relative z-10 mt-12 flex flex-col gap-10 rounded-[32px] border border-neutral-200 bg-white/85 px-6 py-14 shadow-[0_40px_120px_-60px_rgba(16,24,40,0.6)] backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 dark:shadow-[0_40px_120px_-60px_rgba(15,23,42,0.8)] sm:px-10 sm:py-16">
-      <div className="pointer-events-none absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-emerald-400/15 blur-3xl" />
-      <div className="pointer-events-none absolute right-[-10%] top-10 h-80 w-80 rounded-full bg-sky-400/15 blur-3xl" />
-      <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <div className="flex flex-col gap-6">
-          <Reveal>
-            <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">Autonomous mobility control room</p>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <h1 className="text-3xl font-semibold leading-tight text-neutral-900 dark:text-white sm:text-4xl">
-              Ingolstadt Orchestrator
-            </h1>
-          </Reveal>
-          <RevealStack
-            initialDelay={0.14}
-            items={[
-              <p className="text-sm leading-6 text-neutral-600 dark:text-neutral-300 sm:text-base" key="intro">
-                Live telemetry, reinforcement learning, and charging strategy in one view—ready for stakeholders, not slides.
-              </p>,
-            ]}
+    <section className="relative -mx-4 -mt-20 flex min-h-screen items-center justify-center overflow-hidden sm:-mx-6">
+      <div className="absolute inset-0">
+        <Image
+          src="/media/hero-ingolstadt.jpg"
+          alt="Ingolstadt cityscape"
+          fill
+          className="object-cover"
+          priority
+          quality={95}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/60 via-neutral-950/50 to-neutral-950/80" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-8 px-6 text-center text-white">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="space-y-4"
+        >
+          <p className="text-xs uppercase tracking-[0.5em] text-white/70">Autonomous Mobility Twin</p>
+          <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl">
+            Ingolstadt Autonomous Orchestrator
+          </h1>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="max-w-2xl text-base text-white/85 sm:text-lg"
+        >
+          Real-time corridor telemetry, reinforcement learning policy, and energy-aware fleet scheduling converge in a single control room.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+          className="flex flex-col gap-4 sm:flex-row sm:items-center"
+        >
+          <button
+            onClick={handleLaunch}
+            className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-emerald-500/40 transition hover:-translate-y-1 hover:bg-emerald-400"
+          >
+            Launch the twin
+          </button>
+          <button
+            onClick={scrollToTarget}
+            className="inline-flex items-center justify-center rounded-full border-2 border-white/30 px-8 py-4 text-sm font-semibold text-white transition hover:-translate-y-1 hover:border-white/50 hover:bg-white/10"
+          >
+            Explore below
+          </button>
+        </motion.div>
+
+        <motion.button
+          type="button"
+          onClick={scrollToTarget}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.8 }}
+          className="group mt-8 flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.4em] text-white/60 transition hover:text-white"
+        >
+          <span>Scroll to begin</span>
+          <motion.span
+            className="h-12 w-px bg-gradient-to-b from-transparent via-white/60 to-transparent"
+            animate={{ scaleY: [0.6, 1, 0.6], opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           />
-          <Reveal delay={0.24}>
-            <div className="grid gap-3 rounded-3xl border border-neutral-200 bg-white/70 p-4 text-sm text-neutral-600 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/60 dark:text-neutral-300 sm:grid-cols-3">
-              {heroStats.map((stat, index) => (
-                <Reveal key={stat.label} delay={0.04 * index} className="rounded-2xl border border-neutral-200/70 bg-white/80 p-4 dark:border-neutral-700 dark:bg-neutral-900/70">
-                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">{stat.label}</div>
-                  <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-white">{stat.value}</div>
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">{stat.detail}</p>
-                </Reveal>
-              ))}
-            </div>
-          </Reveal>
-          <Reveal delay={0.34} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              onClick={handleLaunch}
-              className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-500"
-            >
-              Run the optimizer now
-            </button>
-            <button
-              onClick={handleExplore}
-              className="inline-flex items-center justify-center rounded-full border border-neutral-300 px-7 py-3 text-sm font-semibold text-neutral-700 transition hover:-translate-y-0.5 hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-200 dark:hover:border-neutral-500"
-            >
-              Scroll to launch
-            </button>
-            <button
-              onClick={handleRLLab}
-              className="inline-flex items-center justify-center rounded-full border border-transparent px-7 py-3 text-sm font-semibold text-emerald-700 hover:-translate-y-0.5 hover:text-emerald-600 dark:text-emerald-300 dark:hover:text-emerald-200"
-            >
-              Explore the RL lab
-            </button>
-          </Reveal>
-        </div>
-        <Reveal>
-          <figure className="relative aspect-[5/4] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-800/10 shadow-lg shadow-neutral-900/20 dark:border-neutral-700 dark:bg-neutral-900/60 dark:shadow-neutral-900/40">
-            <Image
-              src="/media/ingolstadt-traffic.jpg"
-              alt="Live TomTom telemetry across central Ingolstadt"
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 90vw, 540px"
-              priority
-            />
-            <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral-950/80 via-neutral-950/10 to-transparent px-5 pb-4 pt-16 text-sm text-white">
-              <span className="block font-medium">Live telemetry shows how the orchestrator stages AVs along Ingolstadt&apos;s busiest corridor.</span>
-              <span className="mt-1 block text-[13px] text-white/80">Roundabouts calm when AVs share intent—grid stress drops alongside delay.</span>
-            </figcaption>
-          </figure>
-        </Reveal>
+        </motion.button>
       </div>
     </section>
   );

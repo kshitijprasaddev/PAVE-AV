@@ -64,9 +64,9 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
   const [showMetrics, setShowMetrics] = useState(false);
   const [hasRun, setHasRun] = useState(false);
   const [rlMetrics, setRlMetrics] = useState<EpisodeMetrics | null>(null);
-  const [epochHistory, setEpochHistory] = useState<EpisodeMetrics[]>([]);
-  const [stepInsights, setStepInsights] = useState<StepInsight[] | null>(null);
-  const [bestParams, setBestParams] = useState<PolicyParams>({ ...BASE_POLICY_PARAMS });
+  const [_epochHistory, setEpochHistory] = useState<EpisodeMetrics[]>([]);
+  const [_stepInsights, setStepInsights] = useState<StepInsight[] | null>(null);
+  const [_bestParams, setBestParams] = useState<PolicyParams>({ ...BASE_POLICY_PARAMS });
   const showMap = revealed ?? true;
   const optimizerPanelRef = useRef<HTMLDivElement | null>(null);
   const overlayTimerRef = useRef<NodeJS.Timeout | null>(null);

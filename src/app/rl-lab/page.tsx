@@ -846,11 +846,40 @@ export default function RLLabPage() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.16 }}
-        className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]"
+        className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]"
       >
         <div className="rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">City grid heat-map</h2>
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Population-weighted cells indicate where the policy hunts for riders. Top hotspots are annotated for quick storytelling.</p>
+          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Live hotspot overlay</h2>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">The map below shows where the policy stages AVs. Glowing cells are the top demand zones.</p>
+          <div className="mt-4 aspect-[16/9]">
+            <DynamicIngolstadtMap
+              routes={routes}
+              loading={routesLoading || trafficLoading}
+              showLegend={false}
+              trafficWeights={trafficWeights}
+              trafficSegments={trafficSegmentsForMap}
+              selectedRouteId={resolvedSelectedRouteId}
+              onRouteSelect={(route) => setSelectedRouteId(route?.routeId ?? null)}
+            />
+          </div>
+          <div className="mt-3 rounded-2xl border border-neutral-200 bg-white/70 p-3 text-xs text-neutral-600 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-300">
+            <div className="grid gap-2 sm:grid-cols-3">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-4 rounded-full bg-gradient-to-r from-blue-100 via-blue-400 to-blue-700" />
+                <span>Demand heat</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-6 rounded-full bg-gradient-to-r from-yellow-400 to-red-600" />
+                <span>Congestion</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-sm bg-emerald-500" />
+                <span>Depots</span>
+              </div>
+            </div>
+          </div>
+          <h3 className="mt-6 text-base font-semibold text-neutral-900 dark:text-neutral-100">City grid heat-map</h3>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Population-weighted cells show where the policy hunts for riders. Click a cell to lock it in focus.</p>
           <div
             className="mt-4 grid gap-1 rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-inner dark:border-neutral-800 dark:bg-neutral-900/60"
             style={{
@@ -977,75 +1006,38 @@ export default function RLLabPage() {
           </motion.div>
         </div>
 
-        <div className="rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Hotspot narrative</h2>
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Use these bullet points when explaining the plan to stakeholders.</p>
-          <ul className="mt-4 space-y-3 text-sm text-neutral-700 dark:text-neutral-300">
-            {topCells.map((cell, index) => {
-              const isActive = cell.id === activeHotspotId;
-              return (
-                <motion.li
-                  key={cell.id}
-                  initial={false}
-                  onMouseEnter={() => setActiveHotspotIndex(index)}
-                  className="rounded-2xl border p-4 shadow-sm"
-                  style={{ cursor: "pointer" }}
-                  animate={{
-                    backgroundColor: isActive ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.7)",
-                    borderColor: isActive ? "rgba(16,185,129,0.45)" : "rgba(226,232,240,0.7)",
-                    scale: isActive ? 1.02 : 1,
-                    boxShadow: isActive ? "0 18px 32px -18px rgba(16,185,129,0.45)" : "0 0 0 rgba(0,0,0,0)",
-                  }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  whileHover={{ translateY: -4 }}
-                >
-                  <div className="flex items-center justify-between text-xs uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
-                    <span>Cell {cell.id}</span>
-                    <span>Rank {index + 1}</span>
-                  </div>
-                  <p className="mt-1 text-neutral-600 dark:text-neutral-300">
-                    Population index <strong>{cell.population.toFixed(0)}</strong>. The policy keeps roughly <strong>{coverageForRank(index)}</strong> AVs on this block and shifts them toward nearby chargers whenever prices spike above the penalty threshold.
-                  </p>
-                  {isActive ? (
-                    <motion.div
-                      className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-emerald-600"
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.25 }}
-                    >
-                      <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                      Now highlighting
-                    </motion.div>
-                  ) : null}
-                </motion.li>
-              );
-            })}
-          </ul>
+        <div className="space-y-4 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Top hotspots</h2>
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Hover to highlight zones on the grid.</p>
+          </div>
+          {topCells.slice(0, 3).map((cell, index) => {
+            const isActive = cell.id === activeHotspotId;
+            return (
+              <motion.div
+                key={cell.id}
+                onMouseEnter={() => setActiveHotspotIndex(index)}
+                className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-1"
+                animate={{
+                  backgroundColor: isActive ? "rgba(16,185,129,0.12)" : "rgba(255,255,255,0.7)",
+                  borderColor: isActive ? "rgba(16,185,129,0.5)" : "rgba(226,232,240,0.7)",
+                }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                  <span>Cell {cell.id}</span>
+                  <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-emerald-600">Rank {index + 1}</span>
+                </div>
+                <div className="mt-2 flex items-baseline gap-3 text-sm text-neutral-700 dark:text-neutral-200">
+                  <span><strong>{cell.population.toFixed(0)}</strong> pop</span>
+                  <span><strong>{coverageForRank(index)}</strong> AVs</span>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </motion.section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.18 }}
-        className="mt-10 rounded-3xl border border-neutral-200 bg-white/80 p-6 text-sm text-neutral-600 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 dark:text-neutral-300"
-      >
-        <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Reading the outputs</h2>
-        <div className="mt-3 grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/70">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Map &amp; legend</h3>
-            <p className="mt-1">The highlighted corridor marks today&apos;s worst delay. Heat shows demand, line width shows severity, and the legend in the corner decodes every colour.</p>
-          </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/70">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Timeline slider</h3>
-            <p className="mt-1">Drag through the 24-hour curve to see how supply reacts to peaks. The selected hour is mirrored in the corridor cards and stat badges.</p>
-          </div>
-          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-4 dark:border-neutral-800 dark:bg-neutral-900/70">
-            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Policy sliders</h3>
-            <p className="mt-1">Adjusting demand, energy, charge, and exploration immediately re-runs the simulator, updating reward, reliability, and the tick-by-tick log underneath.</p>
-          </div>
-        </div>
-      </motion.section>
     </main>
   );
 }

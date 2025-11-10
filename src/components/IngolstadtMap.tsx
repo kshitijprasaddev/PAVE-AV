@@ -171,13 +171,17 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
       filled: false,
       getLineColor: (feature: { properties?: { delayIndex?: number | null } }) => {
         const delayIndex = feature.properties?.delayIndex ?? 0;
-        const severity = Math.min(1, delayIndex / 30);
+        // Show all segments, not just high delays
+        if (delayIndex < 10) return [100, 200, 255, 180]; // Light blue for low delay
+        if (delayIndex < 30) return [255, 200, 100, 220]; // Yellow for moderate
+        const severity = Math.min(1, delayIndex / 60);
         const base = severityColor(severity);
         return [base[0], Math.max(0, base[1]), Math.max(0, base[2]), 240];
       },
       getLineWidth: (feature: { properties?: { delayIndex?: number | null } }) => {
         const delayIndex = feature.properties?.delayIndex ?? 0;
-        return 2.5 + Math.min(8, delayIndex * 0.45);
+        // Make all segments visible, scale width by severity
+        return Math.max(2, 2.5 + Math.min(10, delayIndex * 0.5));
       },
       lineWidthUnits: "pixels",
       parameters: {
@@ -286,7 +290,7 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
   }, []);
 
   return (
-    <div className="relative w-full overflow-hidden rounded-xl border border-neutral-200 bg-gray-100 shadow-xl dark:border-neutral-800 dark:bg-gray-900 min-h-[480px]">
+    <div className="relative h-full w-full overflow-hidden rounded-xl border border-white/15 bg-neutral-950 shadow-2xl">
       <DeckGL
         layers={layers}
         effects={[lightingEffect]}
@@ -314,23 +318,23 @@ export function IngolstadtMap(props: IngolstadtMapProps) {
         </Map>
       </DeckGL>
       {showLegend && (
-        <div className="pointer-events-none absolute bottom-3 left-3 rounded-md bg-white/85 px-3 py-2 text-[11px] shadow dark:bg-neutral-900/80">
-          <div className="font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">Legend</div>
-          <div className="mt-1 flex items-center gap-2">
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded-xl border border-white/15 bg-black/80 px-4 py-3 text-[11px] shadow-2xl backdrop-blur">
+          <div className="font-semibold uppercase tracking-widest text-neutral-400">Legend</div>
+          <div className="mt-2 flex items-center gap-2">
             <span className="h-2 w-4 rounded-full bg-gradient-to-r from-blue-100 via-blue-400 to-blue-700" />
-            <span>Heat = ride demand density</span>
+            <span className="text-neutral-300">Demand density</span>
           </div>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="h-1.5 w-6 rounded-full bg-gradient-to-r from-yellow-400 to-red-600" />
-            <span>Glowing line = live congestion severity</span>
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="h-1.5 w-5 rounded-full bg-gradient-to-r from-blue-300 to-yellow-400" />
+            <span className="text-neutral-300">Low-moderate delay</span>
           </div>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1.5 flex items-center gap-2">
+            <span className="h-2 w-5 rounded-full bg-gradient-to-r from-yellow-400 to-red-600" />
+            <span className="text-neutral-300">High congestion</span>
+          </div>
+          <div className="mt-1.5 flex items-center gap-2">
             <span className="inline-block h-3 w-3 rounded bg-emerald-500"></span>
-            <span>Charging depots</span>
-          </div>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="h-1 w-6 rounded-full bg-white"></span>
-            <span>White path = corridor you selected</span>
+            <span className="text-neutral-300">Charging depots</span>
           </div>
         </div>
       )}

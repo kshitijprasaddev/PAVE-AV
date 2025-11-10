@@ -543,7 +543,8 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 30 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            className="card-hover relative aspect-[16/9] overflow-hidden rounded-3xl border border-white/10 bg-neutral-950 shadow-2xl"
+            className="card-hover relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl"
+            style={{ aspectRatio: "16/9" }}
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]" />
             {(!showMap || loading) && (

@@ -136,12 +136,16 @@ export async function GET() {
       const delayIndex = speedLimit !== null && harmonicSpeed !== null ? Math.max(0, speedLimit - harmonicSpeed) : null;
       const id = segment.newSegmentId ?? String(segment.segmentId ?? "unknown");
       
-      // Generate descriptive name if streetName is missing
+      // Generate descriptive name with segment differentiation
       let displayName = segment.streetName;
+      const segmentNumber = String(segment.segmentId ?? index).slice(-4);
+      
       if (!displayName || displayName.trim() === "") {
-        const segmentNumber = String(segment.segmentId ?? index).slice(-4);
         const speedCategory = speedLimit && speedLimit >= 50 ? "Arterial" : speedLimit && speedLimit >= 30 ? "Collector" : "Local";
         displayName = `${speedCategory} Segment ${segmentNumber}`;
+      } else {
+        // Add segment ID suffix to differentiate multiple segments of same street
+        displayName = `${displayName} (${segmentNumber})`;
       }
       
       return {

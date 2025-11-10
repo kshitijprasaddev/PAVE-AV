@@ -52,7 +52,10 @@ export function CityGridSimulation({
     return result;
   }, [topCells, coverageForRank]);
 
-  const depotCells = useMemo(() => [cells[0], cells[5], cells[Math.floor(cells.length / 2)]], [cells]);
+  const depotCells = useMemo(() => {
+    // Place depots at the top 3 demand hotspots (where vehicles actually charge)
+    return topCells.slice(0, 3);
+  }, [topCells]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-gradient-to-br from-slate-50 via-neutral-50 to-slate-100 p-6 shadow-inner dark:border-neutral-800 dark:from-neutral-900/60 dark:via-slate-950/80 dark:to-neutral-900/70">

@@ -11,6 +11,7 @@ import { RLSidePanel } from "@/components/RLSidePanel";
 import { TrafficInsights } from "@/components/TrafficInsights";
 import { ExperienceStrip } from "@/components/ExperienceStrip";
 import { NeuralNetworkViz } from "@/components/NeuralNetworkViz";
+import { CongestionStory } from "@/components/CongestionStory";
 import {
   simulateEpisode,
   perturbParams,
@@ -652,19 +653,21 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           </motion.div>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
-          transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
-          className="mt-6"
-        >
-          <TrafficInsights
-            data={trafficData}
-            loading={trafficLoading}
-            error={trafficError}
-            refresh={refreshTraffic}
-          />
-        </motion.div>
+        <div className="mt-8 space-y-8">
+          <CongestionStory />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
+            transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
+          >
+            <TrafficInsights
+              data={trafficData}
+              loading={trafficLoading}
+              error={trafficError}
+              refresh={refreshTraffic}
+            />
+          </motion.div>
+        </div>
       </section>
 
       <motion.section

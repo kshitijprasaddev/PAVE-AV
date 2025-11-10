@@ -160,7 +160,14 @@ export async function GET() {
     });
 
     const topByDelay = mapped
-      .filter((item) => typeof item.delayIndex === "number")
+      .filter((item) => {
+        // Only include city segments (speed limit ≤ 70 km/h to exclude highways)
+        if (!item.speedLimit || item.speedLimit > 70) return false;
+        if (typeof item.delayIndex !== "number") return false;
+        // Must have reasonable sample size
+        if (!item.sampleSize || item.sampleSize < 100) return false;
+        return true;
+      })
       .sort((a, b) => (b.delayIndex ?? 0) - (a.delayIndex ?? 0))
       .slice(0, 10);
 

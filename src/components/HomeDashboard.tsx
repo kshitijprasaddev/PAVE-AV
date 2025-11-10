@@ -561,41 +561,18 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             )}
           </motion.div>
 
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-            <motion.div
-              ref={optimizerPanelRef}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: revealed ? 1 : 0, x: revealed ? 0 : -20 }}
-              transition={{ duration: 0.7, delay: 0.05, ease: "easeOut" }}
-            >
-              <RLSidePanel
-                epoch={epoch}
-                reward={reward}
-                log={log}
-                routes={routes}
-                isRunning={isRunning}
-                hasRun={hasRun}
-                plan={dynamicPlan ?? plan ?? null}
-                basePlan={plan}
-                summary={rlSummary}
-                timeline={dynamicPlan?.demandTimeline ?? rlMetrics?.timeline ?? null}
-                params={bestParams}
-                baselineParams={BASE_POLICY_PARAMS}
-                steps={stepInsights}
-                history={epochHistory}
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: revealed ? 1 : 0, x: revealed ? 0 : 20 }}
-              transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-              className="flex flex-col gap-5 rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80"
-            >
+          <motion.div
+            ref={optimizerPanelRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
+            transition={{ duration: 0.7, delay: 0.05, ease: "easeOut" }}
+            className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]"
+          >
+            <div className="flex flex-col gap-5 rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">City baseline</h3>
                 <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Reliability, energy, grid stress, and reward move here as soon as the optimizer runs.</p>
-                <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
+                <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {headlineStats.map((card, index) => (
                     <Reveal key={card.label} delay={0.08 * index}>
                       <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-white via-white/90 to-white/70 p-4 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900/70 dark:to-neutral-900/60">
@@ -650,8 +627,25 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
                   )}
                 </div>
               </div>
-            </motion.div>
-          </div>
+            </div>
+
+            <RLSidePanel
+              epoch={epoch}
+              reward={reward}
+              log={log}
+              routes={routes}
+              isRunning={isRunning}
+              hasRun={hasRun}
+              plan={dynamicPlan ?? plan ?? null}
+              basePlan={plan}
+              summary={rlSummary}
+              timeline={dynamicPlan?.demandTimeline ?? rlMetrics?.timeline ?? null}
+              params={bestParams}
+              baselineParams={BASE_POLICY_PARAMS}
+              steps={stepInsights}
+              history={epochHistory}
+            />
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}

@@ -15,6 +15,7 @@ import { useTrafficInsights } from "@/hooks/useTrafficInsights";
 import { scenarioIngolstadt } from "@/lib/scenarios";
 import type { RouteDetails } from "@/types/routes";
 import { requestEpisode } from "@/lib/rlClient";
+import { CityGridSimulation } from "@/components/CityGridSimulation";
 
 const DynamicIngolstadtMap = dynamic(
   () => import("@/components/IngolstadtMap").then((mod) => mod.IngolstadtMap),
@@ -878,132 +879,21 @@ export default function RLLabPage() {
               </div>
             </div>
           </div>
-          <h3 className="mt-6 text-base font-semibold text-neutral-900 dark:text-neutral-100">City grid heat-map</h3>
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Population-weighted cells show where the policy hunts for riders. Click a cell to lock it in focus.</p>
-          <div
-            className="mt-4 grid gap-1 rounded-2xl border border-neutral-200 bg-white/70 p-4 shadow-inner dark:border-neutral-800 dark:bg-neutral-900/60"
-            style={{
-              gridTemplateColumns: `repeat(${gridWidth}, minmax(0, 1fr))`,
-              gridTemplateRows: `repeat(${gridHeight}, minmax(0, 1fr))`,
+          <h3 className="mt-6 text-base font-semibold text-neutral-900 dark:text-neutral-100">Simplified grid view</h3>
+          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Animated vehicles show policy actions in real time. Hover hotspot cards to highlight zones.</p>
+          <CityGridSimulation
+            cells={scenarioFrame.cells}
+            gridWidth={gridWidth}
+            gridHeight={gridHeight}
+            maxPopulation={maxPopulation}
+            activeHotspotId={activeHotspotId}
+            topCells={topCells}
+            onCellHover={(cellId) => {
+              const idx = topCells.findIndex((c) => c.id === cellId);
+              if (idx !== -1) setActiveHotspotIndex(idx);
             }}
-          >
-            {scenarioFrame.cells.map((cell) => {
-              const intensity = cell.population / Math.max(maxPopulation, 1);
-              const highlightIndex = topCells.findIndex((top) => top.id === cell.id);
-              const highlight = highlightIndex !== -1;
-              const isActive = highlight && activeHotspotId === cell.id;
-              const background = `linear-gradient(135deg, rgba(59,130,246,${0.16 + intensity * 0.55}), rgba(14,116,144,${0.12 + intensity * 0.45}))`;
-              const textColor = intensity > 0.55 ? "white" : "#0f172a";
-              const demandPercent = Math.round((cell.population / Math.max(maxPopulation, 1)) * 100);
-              const coverageTarget = highlightIndex !== -1 ? coverageForRank(highlightIndex) : Math.max(1, Math.round(demandPercent / 45));
-              return (
-                <motion.div
-                  key={cell.id}
-                  layout
-                  initial={false}
-                  onMouseEnter={() => {
-                    if (highlightIndex !== -1) setActiveHotspotIndex(highlightIndex);
-                  }}
-                  onFocus={() => {
-                    if (highlightIndex !== -1) setActiveHotspotIndex(highlightIndex);
-                  }}
-                  className="relative flex items-center justify-center rounded-md text-[10px] font-semibold"
-                  style={{
-                    background,
-                    color: textColor,
-                    border: highlight
-                      ? `1px solid ${isActive ? "rgba(16,185,129,0.9)" : "rgba(16,185,129,0.45)"}`
-                      : "1px solid rgba(148,163,184,0.25)",
-                    aspectRatio: "1 / 1",
-                  }}
-                  animate={{
-                    scale: isActive ? 1.08 : highlight ? 1.02 : 1,
-                    boxShadow: isActive
-                      ? "0 0 32px rgba(16,185,129,0.35)"
-                      : highlight
-                        ? "0 0 12px rgba(16,185,129,0.15)"
-                        : "0 0 0 rgba(0,0,0,0)",
-                  }}
-                  transition={{ type: "spring", stiffness: 220, damping: 18 }}
-                >
-                  {highlight ? (
-                    <motion.span
-                      key={cell.id}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {cell.population.toFixed(0)}
-                    </motion.span>
-                  ) : null}
-                  <motion.div
-                    className="pointer-events-none absolute inset-0 rounded-md"
-                    style={{
-                      background: highlight
-                        ? "radial-gradient(circle at center, rgba(16,185,129,0.28), transparent 70%)"
-                        : "transparent",
-                    }}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: isActive ? 1 : highlight ? 0.45 : 0 }}
-                    transition={{ duration: 0.4 }}
-                  />
-                  <div className="relative z-10 flex flex-col items-center justify-center gap-1 text-[9px] font-medium">
-                    {highlight ? (
-                      <motion.div
-                        className="inline-flex items-center gap-1 rounded-full bg-black/25 px-2 py-0.5 text-white backdrop-blur"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: isActive ? 1 : 0.85, y: 0 }}
-                        transition={{ duration: 0.25 }}
-                      >
-                        <span className="text-[10px]">🧍‍♂️</span>
-                        <span>{demandPercent}% demand</span>
-                      </motion.div>
-                    ) : null}
-                    {highlight ? (
-                      <motion.div
-                        className="inline-flex items-center gap-1 rounded-full bg-white/70 px-2 py-0.5 text-emerald-700 shadow-sm"
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: isActive ? 1 : 0.85, y: 0 }}
-                        transition={{ duration: 0.25, delay: 0.05 }}
-                      >
-                        <span className="text-[10px]">🛞</span>
-                        <span>{coverageTarget} AVs</span>
-                      </motion.div>
-                    ) : null}
-                  </div>
-                  {isActive ? (
-                    <motion.div
-                      className="pointer-events-none absolute -top-2 right-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[9px] font-semibold text-white shadow"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.25 }}
-                    >
-                      Live focus
-                    </motion.div>
-                  ) : null}
-                </motion.div>
-              );
-            })}
-          </div>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.1 }}
-            className="mt-4 grid gap-3 rounded-2xl border border-neutral-200 bg-white/70 p-4 text-xs text-neutral-600 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-300 sm:grid-cols-3"
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-base">🧍‍♂️</span>
-              <span>Cell colour = rider demand share. Brighter blocks mean more people waiting.</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base">🛞</span>
-              <span>Badge shows how many AVs the policy stages there during peaks.</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-base">✨</span>
-              <span>Glowing ring marks the live focus the narrative card is describing.</span>
-            </div>
-          </motion.div>
+            coverageForRank={coverageForRank}
+          />
         </div>
 
         <div className="space-y-4 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">

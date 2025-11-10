@@ -128,16 +128,25 @@ export async function GET() {
     const segments = extracted.segments;
     geometryMap = extracted.geometryMap;
 
-    const mapped = segments.map((segment) => {
+    const mapped = segments.map((segment, index) => {
       const stat = Array.isArray(segment.segmentTimeResults) ? segment.segmentTimeResults[0] : undefined;
       const harmonicSpeed = stat?.harmonicAverageSpeed ?? null;
       const averageSpeed = stat?.averageSpeed ?? null;
       const speedLimit = segment.speedLimit ?? null;
       const delayIndex = speedLimit !== null && harmonicSpeed !== null ? Math.max(0, speedLimit - harmonicSpeed) : null;
       const id = segment.newSegmentId ?? String(segment.segmentId ?? "unknown");
+      
+      // Generate descriptive name if streetName is missing
+      let displayName = segment.streetName;
+      if (!displayName || displayName.trim() === "") {
+        const segmentNumber = String(segment.segmentId ?? index).slice(-4);
+        const speedCategory = speedLimit && speedLimit >= 50 ? "Arterial" : speedLimit && speedLimit >= 30 ? "Collector" : "Local";
+        displayName = `${speedCategory} Segment ${segmentNumber}`;
+      }
+      
       return {
         id,
-        streetName: segment.streetName ?? "Unknown",
+        streetName: displayName,
         distance: segment.distance ?? null,
         speedLimit,
         harmonicAverageSpeed: harmonicSpeed,

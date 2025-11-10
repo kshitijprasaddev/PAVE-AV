@@ -10,7 +10,7 @@ const featureColumns = [
   {
     eyebrow: "Live map",
     title: "Delay, demand, and charging load arrive in under two minutes.",
-    body: "As soon as you refresh, the map lights up with real traffic slowdowns, depot dwell times, and rider hotspots—no placeholder data.",
+    body: "As soon as you refresh, the map lights up with real traffic slowdowns, depot dwell times, and rider hotspots (no placeholder data).",
     accent: "from-emerald-400/25 via-cyan-300/15 to-transparent",
   },
   {
@@ -45,7 +45,7 @@ export function ExperienceStrip({ className }: { className?: string }) {
           </h3>
         </div>
         <p className="max-w-md text-sm text-neutral-600 dark:text-neutral-300">
-          The layout reads like a quick tour: map on the left, optimizer history on the right, and metric cards that explain what changed in plain language.
+          Three views work together: live corridor telemetry, policy optimization, and deployment metrics. Each panel updates as the system learns.
         </p>
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-3">

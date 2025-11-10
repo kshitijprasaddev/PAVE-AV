@@ -37,7 +37,7 @@ const EUROPE_ROADMAP = [
   {
     stage: "Testbed",
     headline: "Ingolstadt twin is up and streaming.",
-    detail: "Four corridors, 120 AVs, and charging load already feed this layout—the exact setup the jury will see first.",
+    detail: "Four corridors, 120 AVs, and charging load already feed this layout (the exact setup the jury will see first).",
     stamp: "Now",
   },
   {
@@ -512,7 +512,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               </Reveal>
               <Reveal delay={0.14}>
                 <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                  Everything is grouped for quick understanding: live map on the left, optimizer activity on the right, and headline metrics in the middle so anyone can follow the impact in seconds.
+                  Live telemetry, reinforcement learning, and fleet scheduling in one dashboard. Run the optimizer to see corridor deployment recommendations update in real time.
                 </p>
               </Reveal>
             </div>

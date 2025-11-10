@@ -62,7 +62,7 @@ export function NeuralNetworkViz() {
             </h3>
           </div>
           <p className="max-w-md text-sm leading-relaxed text-neutral-300">
-            Proximal Policy Optimization (PPO) processes live telemetry through two hidden layers, then outputs fleet actions—move, charge, or hold.
+            Proximal Policy Optimization (PPO) processes live telemetry through two hidden layers, then outputs fleet actions: move, charge, or hold.
           </p>
         </div>
 
@@ -219,7 +219,7 @@ export function NeuralNetworkViz() {
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-300/80">Training cadence</p>
               <p className="mt-2 leading-relaxed">
-                The Python backend runs 8,000 PPO timesteps on startup, then fine-tunes for 2,000 steps each time you adjust policy weights—balancing speed with responsiveness.
+                The Python backend runs 8,000 PPO timesteps on startup, then fine-tunes for 2,000 steps each time you adjust policy weights (balancing speed with responsiveness).
               </p>
             </div>
             <div>

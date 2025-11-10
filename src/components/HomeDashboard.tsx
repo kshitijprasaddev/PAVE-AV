@@ -506,13 +506,13 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_70%)]" />
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-xl">
-              <Reveal className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">System overview</Reveal>
+              <Reveal className="text-xs font-medium uppercase tracking-[0.4em] text-emerald-400/80">Control Room</Reveal>
               <Reveal delay={0.08}>
-                <h2 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50 sm:text-3xl">Ingolstadt autonomy control room</h2>
+                <h2 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">Ingolstadt Autonomous Mobility Twin</h2>
               </Reveal>
               <Reveal delay={0.14}>
-                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                  Live telemetry, reinforcement learning, and fleet scheduling in one dashboard. Run the optimizer to see corridor deployment recommendations update in real time.
+                <p className="mt-4 text-sm leading-relaxed text-neutral-300 sm:text-base">
+                  Watch live traffic, adjust the reinforcement learning policy, and see fleet deployment recommendations update instantly. Click "Run the optimizer" to start.
                 </p>
               </Reveal>
             </div>

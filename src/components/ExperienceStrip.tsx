@@ -31,40 +31,39 @@ export function ExperienceStrip({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-neutral-200 bg-white/70 p-6 shadow-lg shadow-neutral-900/5 backdrop-blur-lg dark:border-neutral-800 dark:bg-neutral-950/70",
+        "relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/40 via-neutral-950/60 to-black/80 p-8 shadow-2xl backdrop-blur-lg",
         className
       )}
     >
-      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-64 w-[120%] -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-400/20 via-transparent to-sky-400/20 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 top-0 z-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_60%)] dark:bg-[radial-gradient(circle_at_top,_rgba(90,90,170,0.25),_transparent_65%)]" />
-      <div className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <div className="pointer-events-none absolute -top-32 left-1/2 z-0 h-64 w-[120%] -translate-x-1/2 rounded-full bg-gradient-to-r from-emerald-400/15 via-sky-400/10 to-violet-400/15 blur-3xl" />
+      <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">Experience snapshot</p>
-          <h3 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-100 sm:text-3xl">
-            How the twin is organised at a glance
+          <p className="text-xs font-medium uppercase tracking-[0.4em] text-emerald-400/80">Key Features</p>
+          <h3 className="mt-3 text-2xl font-semibold text-white sm:text-3xl">
+            Three integrated views
           </h3>
         </div>
-        <p className="max-w-md text-sm text-neutral-600 dark:text-neutral-300">
-          Three views work together: live corridor telemetry, policy optimization, and deployment metrics. Each panel updates as the system learns.
+        <p className="max-w-md text-sm leading-relaxed text-neutral-300">
+          Corridor telemetry, optimization engine, and deployment metrics update together. No technical background required.
         </p>
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
         {featureColumns.map((feature, idx) => (
           <motion.article
             key={feature.title}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.6, delay: idx * 0.1 }}
-            className="relative overflow-hidden rounded-2xl border border-white/30 bg-white/70 p-5 text-left shadow-sm shadow-neutral-900/10 dark:border-white/5 dark:bg-neutral-900/60"
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="card-hover group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/[0.02] p-6 text-left shadow-xl backdrop-blur"
           >
             <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br", feature.accent)} />
             <div className="relative z-10">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.35em] text-emerald-400/70">
                 {feature.eyebrow}
               </span>
-              <h4 className="mt-3 text-lg font-semibold text-neutral-900 dark:text-neutral-50">{feature.title}</h4>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">{feature.body}</p>
+              <h4 className="mt-4 text-lg font-semibold leading-snug text-white group-hover:text-emerald-300 transition-colors">{feature.title}</h4>
+              <p className="mt-3 text-sm leading-relaxed text-neutral-400 group-hover:text-neutral-300 transition-colors">{feature.body}</p>
             </div>
             <motion.div
               className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/20 blur-2xl dark:bg-white/10"

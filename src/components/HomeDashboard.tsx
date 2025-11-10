@@ -23,6 +23,7 @@ import {
 } from "@/lib/rlSimulation";
 import { requestEpisode } from "@/lib/rlClient";
 import type { RouteDetails } from "@/types/routes";
+import { Reveal } from "@/components/Reveal";
 
 const DynamicIngolstadtMap = dynamic(
   () => import("@/components/IngolstadtMap").then((mod) => mod.IngolstadtMap),
@@ -505,13 +506,17 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(20,90,70,0.18),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(70,100,255,0.18),_transparent_55%)]" />
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-xl">
-              <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">System overview</p>
-              <h2 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50 sm:text-3xl">Ingolstadt autonomy control room</h2>
-              <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
-                Everything is grouped for quick understanding: live map on the left, optimizer activity on the right, and headline metrics in the middle so anyone can follow the impact in seconds.
-              </p>
+              <Reveal className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">System overview</Reveal>
+              <Reveal delay={0.08}>
+                <h2 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50 sm:text-3xl">Ingolstadt autonomy control room</h2>
+              </Reveal>
+              <Reveal delay={0.14}>
+                <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-300">
+                  Everything is grouped for quick understanding: live map on the left, optimizer activity on the right, and headline metrics in the middle so anyone can follow the impact in seconds.
+                </p>
+              </Reveal>
             </div>
-            <div className="flex flex-col items-start gap-3 text-xs text-neutral-500 dark:text-neutral-400 sm:flex-row sm:items-center">
+            <Reveal delay={0.22} className="flex flex-col items-start gap-3 text-xs text-neutral-500 dark:text-neutral-400 sm:flex-row sm:items-center">
               <button
                 onClick={onRun}
                 disabled={loading || isRunning}
@@ -524,11 +529,13 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
                 {lastRun && <span>Last run {new Date(lastRun).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>}
                 {error && <span className="text-rose-500">API fallback: {error}</span>}
               </div>
-            </div>
+            </Reveal>
           </div>
         </motion.div>
 
-        <ExperienceStrip className="mb-6" />
+        <Reveal delay={0.32}>
+          <ExperienceStrip className="mb-6" />
+        </Reveal>
 
         <div className="flex flex-col gap-4">
           <motion.div
@@ -589,28 +596,27 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
                 <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">City baseline</h3>
                 <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Reliability, energy, grid stress, and reward move here as soon as the optimizer runs.</p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
-                  {headlineStats.map((card) => (
-                    <div
-                      key={card.label}
-                      className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-white via-white/90 to-white/70 p-4 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900/70 dark:to-neutral-900/60"
-                    >
-                      <div className="text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">{card.label}</div>
-                      <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50">{card.value}</div>
-                      <div className="text-xs text-neutral-500 dark:text-neutral-400">{card.detail}</div>
-                      {card.delta && (
-                        <div
-                          className={`mt-2 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest ${
-                            card.mood === "positive"
-                              ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200"
-                              : card.mood === "negative"
-                                ? "bg-rose-500/10 text-rose-600 dark:bg-rose-500/10 dark:text-rose-200"
-                                : "bg-neutral-200/60 text-neutral-600 dark:bg-neutral-800/60 dark:text-neutral-300"
-                          }`}
-                        >
-                          {card.delta}
-                        </div>
-                      )}
-                    </div>
+                  {headlineStats.map((card, index) => (
+                    <Reveal key={card.label} delay={0.08 * index}>
+                      <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-white via-white/90 to-white/70 p-4 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900/70 dark:to-neutral-900/60">
+                        <div className="text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">{card.label}</div>
+                        <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50">{card.value}</div>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-400">{card.detail}</div>
+                        {card.delta && (
+                          <div
+                            className={`mt-2 inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-widest ${
+                              card.mood === "positive"
+                                ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-200"
+                                : card.mood === "negative"
+                                  ? "bg-rose-500/10 text-rose-600 dark:bg-rose-500/10 dark:text-rose-200"
+                                  : "bg-neutral-200/60 text-neutral-600 dark:bg-neutral-800/60 dark:text-neutral-300"
+                            }`}
+                          >
+                            {card.delta}
+                          </div>
+                        )}
+                      </div>
+                    </Reveal>
                   ))}
                 </div>
               </div>
@@ -619,27 +625,28 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
                 <h4 className="text-base font-semibold text-neutral-900 dark:text-neutral-50">Corridors in focus</h4>
                 <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">These are the three corridors with the highest delay right now.</p>
                 <div className="mt-3 space-y-3">
-                  {topRoutes.slice(0, 3).map((route) => (
-                    <div
-                      key={route.routeId}
-                      className="rounded-xl border border-neutral-200 bg-white/75 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900/70"
-                    >
-                      <div className="flex items-center justify-between text-sm font-semibold text-neutral-800 dark:text-neutral-100">
-                        <span>{route.routeName}</span>
-                        <span className="text-xs uppercase tracking-widest text-rose-500 dark:text-rose-300">Delay {(route.delayTime ?? 0).toFixed(0)}s</span>
+                  {topRoutes.slice(0, 3).map((route, index) => (
+                    <Reveal key={route.routeId} delay={0.08 * index}>
+                      <div className="rounded-xl border border-neutral-200 bg-white/75 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900/70">
+                        <div className="flex items-center justify-between text-sm font-semibold text-neutral-800 dark:text-neutral-100">
+                          <span>{route.routeName}</span>
+                          <span className="text-xs uppercase tracking-widest text-rose-500 dark:text-rose-300">Delay {(route.delayTime ?? 0).toFixed(0)}s</span>
+                        </div>
+                        {route.area && <p className="text-xs text-neutral-500 dark:text-neutral-400">{route.area}</p>}
+                        <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                          <span>Typical {Math.round((route.typicalTravelTime ?? 0) / 60)} min</span>
+                          <span>Length {((route.routeLength ?? 0) / 1000).toFixed(1)} km</span>
+                          <span>Speed gap {(((route.routeLength ?? 0) / Math.max(route.travelTime ?? 1, 1)) * 3.6).toFixed(1)} km/h</span>
+                        </div>
                       </div>
-                      {route.area && <p className="text-xs text-neutral-500 dark:text-neutral-400">{route.area}</p>}
-                      <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-neutral-500 dark:text-neutral-400">
-                        <span>Typical {Math.round((route.typicalTravelTime ?? 0) / 60)} min</span>
-                        <span>Length {((route.routeLength ?? 0) / 1000).toFixed(1)} km</span>
-                        <span>Speed gap {(((route.routeLength ?? 0) / Math.max(route.travelTime ?? 1, 1)) * 3.6).toFixed(1)} km/h</span>
-                      </div>
-                    </div>
+                    </Reveal>
                   ))}
                   {topRoutes.length === 0 && (
-                    <div className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50/80 p-4 text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-400">
-                      Corridor stats will load once the TomTom feed responds.
-                    </div>
+                    <Reveal>
+                      <div className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50/80 p-4 text-sm text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-400">
+                        Corridor stats will load once the TomTom feed responds.
+                      </div>
+                    </Reveal>
                   )}
                 </div>
               </div>
@@ -654,31 +661,6 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             <NeuralNetworkViz />
           </motion.div>
         </div>
-
-        {revealed && !hasRun && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-6 grid gap-4 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-sm backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 sm:grid-cols-3"
-          >
-            <div>
-              <div className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Step 1</div>
-              <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Run the optimizer</p>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">One click pulls new traffic data and lets the agent learn for a few quick epochs.</p>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Step 2</div>
-              <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Explore the twin</p>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Hover the map to see which corridors are hurting and how depot load shifts.</p>
-            </div>
-            <div>
-              <div className="text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Step 3</div>
-              <p className="mt-2 text-sm font-semibold text-neutral-800 dark:text-neutral-100">Explain what changed</p>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Use the cards to call out reliability gain, energy saved, and grid relief in plain language.</p>
-            </div>
-          </motion.div>
-        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

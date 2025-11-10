@@ -1,212 +1,140 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import { useCallback } from "react";
+import { Reveal, RevealStack } from "@/components/Reveal";
 
 type HeroProps = {
-  onReveal: () => void;
-  revealed: boolean;
+  scrollTargetId?: string;
 };
 
-const shards = [
-  { rotate: -4, x: "-35%", y: "-10%" },
-  { rotate: 3, x: "10%", y: "-20%" },
-  { rotate: -8, x: "-5%", y: "20%" },
-  { rotate: 6, x: "30%", y: "15%" },
-  { rotate: 0, x: "0%", y: "-5%" },
-];
+const heroStats = [
+  { label: "Reliability uplift", value: "+18%", detail: "Average gain versus legacy bus schedules" },
+  { label: "Energy saved", value: "22%", detail: "Fewer peak-tariff charges across the fleet" },
+  { label: "Fewer vehicles", value: "-31", detail: "Route redesign lets AVs replace peak buses" },
+] as const;
 
-const orbs = [
+const heroGallery = [
   {
-    className: "top-[-15%] left-[-5%] h-64 w-64 bg-gradient-to-br from-emerald-400/40 via-transparent to-transparent",
-    animation: { duration: 14, delay: 0.2 },
+    src: "/media/av-intersection.jpg",
+    alt: "Autonomous shuttles negotiating a connected intersection",
+    caption: "Intersections become choreographed lanes once telemetry feeds the orchestrator.",
   },
   {
-    className: "bottom-[-10%] right-[5%] h-72 w-72 bg-gradient-to-br from-sky-400/35 via-transparent to-transparent",
-    animation: { duration: 16, delay: 0.6 },
+    src: "/media/av-fleet.jpg",
+    alt: "Autonomous fleet coverage illustrated across a busy avenue",
+    caption: "Halos highlight how the learner balances hotspots with standby vehicles.",
   },
   {
-    className: "top-1/3 right-1/2 h-56 w-56 bg-gradient-to-br from-violet-400/30 via-transparent to-transparent",
-    animation: { duration: 18, delay: 1 },
+    src: "/media/av-roundabout.jpg",
+    alt: "Autonomous vehicles coordinating at a roundabout",
+    caption: "Roundabouts calm when AVs share intent—grid stress drops alongside delay.",
   },
-];
+] as const;
 
-export function Hero({ onReveal, revealed }: HeroProps) {
-  const [play, setPlay] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
+  const scrollToTarget = useCallback(() => {
+    const target = document.getElementById(scrollTargetId);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [scrollTargetId]);
 
-  const scrollToTarget = useCallback((targetId?: string) => {
-    const scrollOnce = () => {
-      const target = targetId ? document.getElementById(targetId) : document.getElementById("dashboard");
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    };
-    scrollOnce();
-    window.setTimeout(scrollOnce, 320);
-  }, []);
+  const handleLaunch = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("run-optimization"));
+    scrollToTarget();
+  }, [scrollToTarget]);
 
-  const triggerReveal = ({ run, targetId, href }: { run: boolean; targetId?: string; href?: string }) => {
-    if (play) return;
-    setPlay(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    onReveal();
-    const delay = run ? 900 : 350;
-    timerRef.current = setTimeout(() => {
-      if (run) window.dispatchEvent(new CustomEvent("run-optimization"));
-      if (href) {
-        window.location.href = href;
-      } else {
-        scrollToTarget(targetId);
-      }
-    }, delay);
-  };
+  const handleExplore = useCallback(() => {
+    scrollToTarget();
+  }, [scrollToTarget]);
 
-  const handleReveal = () => {
-    triggerReveal({ run: false, targetId: "dashboard" });
-  };
-
-  const handleWhy = () => {
-    triggerReveal({ run: false, href: "/concept#why-ingolstadt" });
-  };
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+  const handleRLLab = useCallback(() => {
+    window.location.href = "/rl-lab";
   }, []);
 
   return (
-    <AnimatePresence>
-      {!revealed && (
-        <motion.section
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-neutral-950"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: play ? 0 : 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: "easeInOut" }}
-        >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, rgba(5,5,15,0.9), rgba(10,45,68,0.75)), url('/hero-investor.jpg')",
-            }}
+    <section className="relative z-10 mt-12 flex flex-col gap-10 rounded-[32px] border border-neutral-200 bg-white/85 px-6 py-14 shadow-[0_40px_120px_-60px_rgba(16,24,40,0.6)] backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 dark:shadow-[0_40px_120px_-60px_rgba(15,23,42,0.8)] sm:px-10 sm:py-16">
+      <div className="pointer-events-none absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-emerald-400/15 blur-3xl" />
+      <div className="pointer-events-none absolute right-[-10%] top-10 h-80 w-80 rounded-full bg-sky-400/15 blur-3xl" />
+      <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+        <div className="flex flex-col gap-6">
+          <Reveal>
+            <p className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">Autonomous city twin</p>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <h1 className="text-3xl font-semibold leading-tight text-neutral-900 dark:text-white sm:text-4xl">
+              Ingolstadt orchestrator: explainable reinforcement learning for city corridors
+            </h1>
+          </Reveal>
+          <RevealStack
+            initialDelay={0.14}
+            items={[
+              <p className="text-sm leading-6 text-neutral-600 dark:text-neutral-300 sm:text-base" key="intro">
+                The homepage now drops you straight into the experience: live city telemetry, a reinforcement learner tuning in the background,
+                and graphics that make the strategy obvious on any screen. No gimmicks—just the knobs you can turn and the proof that they work.
+              </p>,
+            ]}
           />
-          {orbs.map((orb, idx) => (
-            <motion.div
-              key={idx}
-              className={`pointer-events-none absolute rounded-full blur-3xl ${orb.className}`}
-              initial={{ opacity: 0.2, scale: 0.9 }}
-              animate={{ opacity: [0.2, 0.45, 0.2], scale: [0.9, 1.05, 0.92] }}
-              transition={{ duration: orb.animation.duration, delay: orb.animation.delay, repeat: Infinity, ease: "easeInOut" }}
-            />
-          ))}
-          <div className="relative z-10 mx-auto flex max-w-5xl flex-col gap-10 px-6 text-white">
-            <motion.h1
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-3xl font-semibold tracking-tight sm:text-[44px]"
-            >
-              Autonomous Mobility Orchestrator · Ingolstadt City Twin
-            </motion.h1>
-            <motion.p
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.35, duration: 0.6 }}
-              className="max-w-3xl text-[13px] text-white/80 sm:text-[15px]"
-            >
-              I built a real-time autonomous mobility twin so I can stand on stage in Brussels and show exactly how many lives, hours, and kilowatts a student-designed AV fleet can save.
-            </motion.p>
-            <motion.p
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.45, duration: 0.6 }}
-              className="text-[12px] text-white/70 sm:text-[14px]"
-            >
-              Live corridor telemetry, reinforcement planning, and energy-aware scheduling come together here—it&apos;s the same demo I will defend in front of the PAVE Europe jury.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55, duration: 0.6 }}
-              className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 text-left shadow-xl backdrop-blur-sm sm:grid-cols-3"
-            >
-              {[ 
-                { value: "1.35M", label: "lives lost each year", note: "AV-first streets can protect thousands" },
-                { value: "70B", label: "hours spent driving", note: "Autonomy gives this time back to citizens" },
-                { value: "0.3 kWh", label: "energy per AV ride", note: "My twin balances fleet load with the grid" },
-              ].map((item, idx) => (
-                <motion.div
-                  key={item.value}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 + idx * 0.15, duration: 0.55 }}
-                  className="rounded-2xl bg-white/5 p-4"
-                >
-                  <div className="text-3xl font-semibold text-white sm:text-4xl">{item.value}</div>
-                  <div className="mt-1 text-xs uppercase tracking-[0.3em] text-lime-200/80">{item.label}</div>
-                  <p className="mt-2 text-xs text-white/70">{item.note}</p>
-                </motion.div>
+          <Reveal delay={0.24}>
+            <div className="grid gap-3 rounded-3xl border border-neutral-200 bg-white/70 p-4 text-sm text-neutral-600 shadow-sm dark:border-neutral-800 dark:bg-neutral-900/60 dark:text-neutral-300 sm:grid-cols-3">
+              {heroStats.map((stat, index) => (
+                <Reveal key={stat.label} delay={0.04 * index} className="rounded-2xl border border-neutral-200/70 bg-white/80 p-4 dark:border-neutral-700 dark:bg-neutral-900/70">
+                  <div className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">{stat.label}</div>
+                  <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-white">{stat.value}</div>
+                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">{stat.detail}</p>
+                </Reveal>
               ))}
-            </motion.div>
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.85, duration: 0.6 }}
-              className="flex flex-col items-start gap-3 sm:flex-row"
+            </div>
+          </Reveal>
+          <Reveal delay={0.34} className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <button
+              onClick={handleLaunch}
+              className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 hover:bg-emerald-500"
             >
-              <button
-                onClick={handleReveal}
-                className="rounded-full bg-emerald-500 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/40 transition hover:-translate-y-0.5 hover:bg-emerald-400"
-              >
-                Enter the city twin
-              </button>
-              <button
-                onClick={handleWhy}
-                className="rounded-full border border-white/25 px-7 py-3 text-sm font-semibold text-white/85 transition hover:bg-white/10"
-              >
-                Why Ingolstadt?
-              </button>
-            </motion.div>
-            <motion.button
-              type="button"
-              onClick={handleReveal}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.6 }}
-              className="group flex flex-col items-center gap-2 text-[11px] uppercase tracking-[0.4em] text-white/70 transition hover:text-white"
+              Run the optimizer now
+            </button>
+            <button
+              onClick={handleExplore}
+              className="inline-flex items-center justify-center rounded-full border border-neutral-300 px-7 py-3 text-sm font-semibold text-neutral-700 transition hover:-translate-y-0.5 hover:border-neutral-400 dark:border-neutral-700 dark:text-neutral-200 dark:hover:border-neutral-500"
             >
-              <span>Scroll to launch</span>
-              <motion.span
-                className="h-12 w-px bg-gradient-to-b from-transparent via-white/70 to-transparent"
-                animate={{ scaleY: [0.6, 1, 0.6], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1.8, repeat: Infinity }}
+              Scroll to launch
+            </button>
+            <button
+              onClick={handleRLLab}
+              className="inline-flex items-center justify-center rounded-full border border-transparent px-7 py-3 text-sm font-semibold text-emerald-700 hover:-translate-y-0.5 hover:text-emerald-600 dark:text-emerald-300 dark:hover:text-emerald-200"
+            >
+              Explore the RL lab
+            </button>
+          </Reveal>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Reveal className="col-span-2">
+            <figure className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-800/10 shadow-lg shadow-neutral-900/20 dark:border-neutral-700 dark:bg-neutral-900/60 dark:shadow-neutral-900/40">
+              <Image
+                src="/media/av-corridor.jpg"
+                alt="Autonomous vehicles cruising through a connected corridor in Ingolstadt"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 90vw, 540px"
+                priority
               />
-            </motion.button>
-          </div>
-
-          {shards.map((shard, idx) => (
-            <motion.div
-              key={idx}
-              className="absolute h-[140vh] w-[70vw] bg-white/4 backdrop-blur-sm"
-              style={{
-                left: shard.x,
-                top: shard.y,
-                rotate: `${shard.rotate}deg`,
-                border: "1px solid rgba(255,255,255,0.05)",
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: play ? 0 : 0.6, scale: play ? 1.4 : 1 }}
-              exit={{ opacity: 0, scale: 1.6 }}
-              transition={{ duration: 1, delay: 0.05 * idx, ease: "easeInOut" }}
-            />
+              <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral-950/70 via-neutral-950/10 to-transparent px-5 pb-4 pt-16 text-sm text-white">
+                Live telemetry shows how the orchestrator stages AVs along Ingolstadt’s busiest corridor.
+              </figcaption>
+            </figure>
+          </Reveal>
+          {heroGallery.map((image, index) => (
+            <Reveal key={image.src} delay={0.1 * (index + 1)}>
+              <figure className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-neutral-200/80 bg-neutral-800/10 shadow-lg shadow-neutral-900/20 dark:border-neutral-700 dark:bg-neutral-900/60 dark:shadow-neutral-900/40">
+                <Image src={image.src} alt={image.alt} fill className="object-cover" sizes="260px" />
+                <figcaption className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-neutral-950/70 via-neutral-950/10 to-transparent px-4 pb-3 pt-10 text-[11px] text-white">
+                  {image.caption}
+                </figcaption>
+              </figure>
+            </Reveal>
           ))}
-        </motion.section>
-      )}
-    </AnimatePresence>
+        </div>
+      </div>
+    </section>
   );
 }
-
-

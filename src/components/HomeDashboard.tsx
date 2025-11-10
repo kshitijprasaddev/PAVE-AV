@@ -500,10 +500,10 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="relative mb-6 overflow-hidden rounded-3xl border border-neutral-200 bg-gradient-to-br from-white/90 via-white/70 to-white/50 p-6 shadow-xl shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:from-neutral-950/90 dark:via-neutral-950/70 dark:to-neutral-950/50"
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="relative mb-8 overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br from-neutral-900/50 via-black/40 to-neutral-950/60 p-8 shadow-2xl backdrop-blur"
         >
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(20,90,70,0.18),_transparent_55%)] dark:bg-[radial-gradient(circle_at_top,_rgba(70,100,255,0.18),_transparent_55%)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.12),_transparent_70%)]" />
           <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div className="max-w-xl">
               <Reveal className="text-xs uppercase tracking-[0.42em] text-neutral-500 dark:text-neutral-400">System overview</Reveal>
@@ -537,12 +537,12 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           <ExperienceStrip className="mb-6" />
         </Reveal>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 30 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-            className="relative aspect-[16/9] overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-950 shadow-2xl shadow-neutral-900/30 dark:border-neutral-800"
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="card-hover relative aspect-[16/9] overflow-hidden rounded-3xl border border-white/10 bg-neutral-950 shadow-2xl"
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.25),_transparent_65%)]" />
             {(!showMap || loading) && (
@@ -565,17 +565,17 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             ref={optimizerPanelRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
-            transition={{ duration: 0.7, delay: 0.05, ease: "easeOut" }}
-            className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]"
+            transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,360px)]"
           >
-            <div className="flex flex-col gap-5 rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80">
+            <div className="card-hover flex flex-col gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/60 to-neutral-950/80 p-6 shadow-xl backdrop-blur">
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">City baseline</h3>
                 <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Reliability, energy, grid stress, and reward move here as soon as the optimizer runs.</p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {headlineStats.map((card, index) => (
                     <Reveal key={card.label} delay={0.08 * index}>
-                      <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-white via-white/90 to-white/70 p-4 shadow-sm dark:border-neutral-800 dark:from-neutral-900 dark:via-neutral-900/70 dark:to-neutral-900/60">
+                      <div className="card-hover rounded-2xl border border-white/10 bg-gradient-to-br from-neutral-800/40 to-neutral-900/60 p-4 shadow-lg backdrop-blur">
                         <div className="text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">{card.label}</div>
                         <div className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50">{card.value}</div>
                         <div className="text-xs text-neutral-500 dark:text-neutral-400">{card.detail}</div>
@@ -604,7 +604,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
                 <div className="mt-3 space-y-3">
                   {topRoutes.slice(0, 3).map((route, index) => (
                     <Reveal key={route.routeId} delay={0.08 * index}>
-                      <div className="rounded-xl border border-neutral-200 bg-white/75 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-neutral-300 dark:border-neutral-800 dark:bg-neutral-900/70">
+                      <div className="card-hover rounded-xl border border-white/10 bg-gradient-to-br from-neutral-800/30 to-neutral-900/50 p-4 shadow-lg backdrop-blur">
                         <div className="flex items-center justify-between text-sm font-semibold text-neutral-800 dark:text-neutral-100">
                           <span>{route.routeName}</span>
                           <span className="text-xs uppercase tracking-widest text-rose-500 dark:text-rose-300">Delay {(route.delayTime ?? 0).toFixed(0)}s</span>

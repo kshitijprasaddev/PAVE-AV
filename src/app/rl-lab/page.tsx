@@ -373,29 +373,29 @@ export default function RLLabPage() {
   ];
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-12">
+    <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="rounded-3xl border border-neutral-200 bg-white/85 p-8 shadow-lg shadow-neutral-900/5 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/75"
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+        className="rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/60 to-neutral-950/80 p-6 shadow-2xl backdrop-blur sm:p-8"
       >
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
-            <h1 className="text-3xl font-semibold text-neutral-900 dark:text-neutral-100">RL Lab</h1>
-            <p className="mt-3 text-base text-neutral-600 dark:text-neutral-300">
-              This lab opens the policy black box. Every optimisation run spins the Ingolstadt twin for 180 simulated minutes, perturbs four weights, and keeps whichever mix beats the baseline without breaching grid guardrails. Pick a policy profile, scrub the demand timeline, then tune the weights yourself to see how the reinforcement learner responds.
+            <h1 className="text-2xl font-semibold text-white sm:text-3xl">RL Lab</h1>
+            <p className="mt-4 text-sm leading-relaxed text-neutral-300 sm:text-base">
+              Explore how the reinforcement learning policy balances demand, energy costs, and grid constraints. Compare pre-configured strategies, adjust policy weights with sliders, and watch the simulation respond in real time.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {SCENARIO_MODES.map((mode) => (
               <button
                 key={mode.id}
                 onClick={() => handleScenarioSelect(mode)}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition ${
+                className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
                   mode.id === selectedScenarioId
-                    ? "bg-neutral-900 text-white shadow-lg shadow-neutral-900/30 dark:bg-white dark:text-neutral-900"
-                    : "bg-white/70 text-neutral-500 hover:text-neutral-800 dark:bg-neutral-900/70 dark:text-neutral-300 dark:hover:text-neutral-50"
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-600/40"
+                    : "border border-white/20 bg-white/5 text-neutral-300 hover:border-white/30 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {mode.label}
@@ -403,14 +403,16 @@ export default function RLLabPage() {
             ))}
           </div>
         </div>
-        <p className="mt-4 text-sm text-neutral-600 dark:text-neutral-400">{scenarioMode.explainer}</p>
+        <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-200/90">
+          <span className="font-semibold">Scenario:</span> {scenarioMode.explainer}
+        </div>
       </motion.section>
 
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.05 }}
-        className="mt-8 grid gap-4 rounded-3xl border border-neutral-200 bg-white/85 p-6 shadow-sm shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80 sm:grid-cols-3"
+        transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-8 grid gap-4 rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/60 to-neutral-950/80 p-6 shadow-2xl backdrop-blur sm:grid-cols-3"
       >
         {processStages.map((stage, idx) => {
           const colorClasses = {
@@ -865,19 +867,19 @@ export default function RLLabPage() {
       <motion.section
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.16 }}
-        className="mt-10 rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md shadow-neutral-900/10 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/80"
+        transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-10 rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/60 to-neutral-950/80 p-6 shadow-2xl backdrop-blur sm:p-8"
       >
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">Fleet deployment visualization</h2>
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-            The map shows real Ingolstadt corridors. Below, the grid simulates how the policy positions vehicles across demand zones—hover cards to see coverage in action.
+          <h2 className="text-xl font-semibold text-white sm:text-2xl">Fleet deployment visualization</h2>
+          <p className="mt-3 text-sm leading-relaxed text-neutral-300 sm:text-base">
+            The map shows real Ingolstadt corridors with live traffic data. The grid below simulates vehicle movements: blue icons serve demand, green icons charge at depots. Hover priority zone cards to highlight coverage.
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div>
-            <div className="aspect-[16/9] overflow-hidden rounded-2xl border border-neutral-200 shadow-sm dark:border-neutral-800">
+            <div className="aspect-[16/9] overflow-hidden rounded-2xl border border-white/15 shadow-xl">
               <DynamicIngolstadtMap
                 routes={routes}
                 loading={routesLoading || trafficLoading}
@@ -888,8 +890,8 @@ export default function RLLabPage() {
                 onRouteSelect={(route) => setSelectedRouteId(route?.routeId ?? null)}
               />
             </div>
-            <div className="mt-3 rounded-xl border border-neutral-200/70 bg-white/70 p-3 text-xs text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-300">
-              <div className="grid gap-2 sm:grid-cols-3">
+            <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-3 text-xs text-neutral-300 backdrop-blur">
+              <div className="grid gap-3 sm:grid-cols-3">
                 <div className="flex items-center gap-2">
                   <span className="h-2 w-4 rounded-full bg-gradient-to-r from-blue-200 to-blue-600" />
                   <span>Demand heat</span>
@@ -905,10 +907,10 @@ export default function RLLabPage() {
               </div>
             </div>
 
-            <div className="mt-6">
-              <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Grid simulation</h3>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                Each cell represents a 500m × 500m zone. Vehicle icons show real-time policy decisions: blue = moving to demand, green = charging.
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-white">Grid simulation</h3>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+                Each cell represents a 500m zone. Vehicle icons show real-time policy decisions (blue = serving demand, green = charging at depot).
               </p>
               <div className="mt-3">
                 <CityGridSimulation
@@ -930,9 +932,9 @@ export default function RLLabPage() {
 
           <div className="space-y-4">
             <div>
-              <h3 className="text-base font-semibold text-neutral-900 dark:text-neutral-100">Priority zones</h3>
-              <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
-                These are the top 3 demand hotspots. Hover to see vehicle allocation on the grid.
+              <h3 className="text-lg font-semibold text-white">Priority zones</h3>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+                Top 3 demand hotspots. Hover to highlight vehicle allocation on the grid.
               </p>
             </div>
             {topCells.slice(0, 3).map((cell, index) => {
@@ -942,45 +944,42 @@ export default function RLLabPage() {
                 <motion.div
                   key={cell.id}
                   onMouseEnter={() => setActiveHotspotIndex(index)}
-                  className="rounded-2xl border p-4 shadow-sm transition hover:-translate-y-1"
+                  className="card-hover cursor-pointer rounded-2xl border p-4"
                   animate={{
-                    backgroundColor: isActive ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.8)",
-                    borderColor: isActive ? "rgba(16,185,129,0.6)" : "rgba(226,232,240,0.8)",
+                    backgroundColor: isActive ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.05)",
+                    borderColor: isActive ? "rgba(16,185,129,0.7)" : "rgba(255,255,255,0.15)",
                   }}
-                  transition={{ duration: 0.25 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">
+                    <div className="text-xs font-semibold uppercase tracking-widest text-neutral-400">
                       Zone {cell.id}
                     </div>
-                    <span className="rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-semibold text-emerald-600">
-                      Rank {index + 1}
+                    <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-400">
+                      #{index + 1}
                     </span>
                   </div>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
-                      <div className="text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Rider demand</div>
-                      <div className="mt-1 text-xl font-semibold text-neutral-900 dark:text-neutral-100">{demandPercent}%</div>
+                      <div className="text-[10px] font-medium uppercase tracking-wider text-neutral-500">Demand</div>
+                      <div className="mt-1.5 text-2xl font-bold text-white">{demandPercent}%</div>
                     </div>
                     <div>
-                      <div className="text-[11px] uppercase tracking-wide text-neutral-500 dark:text-neutral-400">Fleet coverage</div>
-                      <div className="mt-1 text-xl font-semibold text-emerald-600 dark:text-emerald-400">{coverageForRank(index)} AVs</div>
+                      <div className="text-[10px] font-medium uppercase tracking-wider text-neutral-500">Coverage</div>
+                      <div className="mt-1.5 text-2xl font-bold text-emerald-400">{coverageForRank(index)}</div>
                     </div>
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
-                    Policy keeps {coverageForRank(index)} vehicles staged here during peak hours, repositioning to nearby chargers when energy prices spike.
-                  </p>
                 </motion.div>
               );
             })}
 
-            <div className="rounded-2xl border border-neutral-200/70 bg-gradient-to-br from-neutral-50 to-white p-4 text-xs text-neutral-600 shadow-sm dark:border-neutral-700 dark:from-neutral-900/60 dark:to-neutral-950/80 dark:text-neutral-300">
-              <p className="font-semibold text-neutral-700 dark:text-neutral-200">How it works</p>
+            <div className="rounded-2xl border border-sky-500/20 bg-sky-500/5 p-4 text-xs text-sky-200/90 backdrop-blur">
+              <p className="font-semibold">Quick guide</p>
               <ul className="mt-2 space-y-1.5 text-[11px] leading-relaxed">
-                <li>• Brighter cells = higher rider demand</li>
-                <li>• Blue cars = moving toward demand</li>
-                <li>• Green cars = charging at depot</li>
-                <li>• AV count scales with zone priority</li>
+                <li>→ Brighter cells = higher demand</li>
+                <li>→ Blue vehicles = serving riders</li>
+                <li>→ Green vehicles = charging</li>
+                <li>→ Depots (green background) = fixed hubs</li>
               </ul>
             </div>
           </div>

@@ -13,11 +13,11 @@ type BaseRevealProps = {
 
 export function Reveal({ as = "div", children, className, delay = 0 }: BaseRevealProps) {
   const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.18 });
-  const Component = (motion[as] ?? motion.div) as typeof motion.div;
+  const Component = motion[as] as typeof motion.div;
 
   return (
     <Component
-      ref={ref as never}
+      ref={ref}
       className={className}
       initial={{ opacity: 0, y: 22 }}
       animate={inView ? { opacity: 1, y: 0 } : undefined}

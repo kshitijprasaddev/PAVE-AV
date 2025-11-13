@@ -43,7 +43,7 @@ export function Hero({ scrollTargetId = "dashboard" }: HeroProps) {
         >
           <p className="text-xs uppercase tracking-[0.5em] text-white/70">Autonomous Mobility Twin</p>
           <h1 className="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl md:text-6xl">
-            Ingolstadt Autonomous Orchestrator
+            Autonomous Orchestrator
           </h1>
         </motion.div>
 

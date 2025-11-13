@@ -78,7 +78,7 @@ export function RLSidePanel({
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">RL policy studio</h3>
         <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
-          Ten simulated hours run each time you hit optimize. Each episode adjusts the weights below, then we keep the best reward to update the deployment plan.
+          Ten simulated hours run each time the optimizer runs. Each episode adjusts the weights below, then the system keeps the best reward to update the deployment plan.
         </p>
 
         <div className="mt-4">

@@ -8,15 +8,15 @@ function cn(...classes: Array<string | false | null | undefined>) {
 
 const featureColumns = [
   {
-    eyebrow: "Live map",
-    title: "Delay, demand, and charging load arrive in under two minutes.",
-    body: "As soon as you refresh, the map lights up with real traffic slowdowns, depot dwell times, and rider hotspots (no placeholder data).",
+    eyebrow: "Traffic map",
+    title: "Real corridor data drives deployment precision.",
+    body: "TomTom traffic telemetry identifies congestion hotspots. Census and land-use data predict rider demand. Depot markers show charging infrastructure capacity.",
     accent: "from-emerald-400/25 via-cyan-300/15 to-transparent",
   },
   {
     eyebrow: "Policy levers",
-    title: "Every slider shows its impact in plain numbers.",
-    body: "Demand weight, charge threshold, and exploration instantly update the reliability, wait times, and energy cards so anyone can follow along.",
+    title: "Tune the optimizer, see instant impact.",
+    body: "Adjust demand weight, charge threshold, and exploration rate. The platform recalculates reliability, energy cost, and grid stress in real time.",
     accent: "from-sky-400/25 via-indigo-300/15 to-transparent",
   },
   {

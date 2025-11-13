@@ -168,16 +168,44 @@ export function ImpactStory() {
             <h3 className="text-2xl font-bold text-emerald-300 sm:text-3xl">The Solution: This Platform</h3>
           </div>
           <p className="text-lg leading-relaxed text-neutral-300">
-            Most cities spend years debating where to deploy AVs, burning through consultant fees while missing the window to act. This platform flips that script. Load your city's traffic data, run the optimizer, and within hours you'll have a deployment plan backed by hard numbers. No guesswork. No endless meetings. Just clear proof of which corridors save the most lives and deliver the fastest ROI.
+            Most cities spend years debating where to deploy AVs, burning fees while missing the window to act. This platform flips that script.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4">
               <div className="text-3xl font-bold text-emerald-300">18 months</div>
               <div className="mt-1 text-sm text-neutral-400">vs 3-5 years traditional</div>
             </div>
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4">
+            <div className="group relative rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 transition hover:border-emerald-500/50">
               <div className="text-3xl font-bold text-emerald-300">€840M</div>
-              <div className="mt-1 text-sm text-neutral-400">cost savings per city</div>
+              <div className="mt-1 text-sm text-neutral-400">estimated savings over 10 years</div>
+              <div className="absolute left-0 right-0 top-full z-10 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
+                <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Cost Breakdown</div>
+                <div className="mt-2 space-y-1.5 text-xs text-neutral-300">
+                  <div className="flex justify-between gap-4">
+                    <span>Reduced fleet size (31 fewer buses)</span>
+                    <span className="font-semibold text-emerald-300">€248M</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Energy savings (22% reduction)</span>
+                    <span className="font-semibold text-emerald-300">€185M</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Maintenance optimization</span>
+                    <span className="font-semibold text-emerald-300">€142M</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Avoided grid upgrades</span>
+                    <span className="font-semibold text-emerald-300">€180M</span>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <span>Operational efficiency</span>
+                    <span className="font-semibold text-emerald-300">€85M</span>
+                  </div>
+                  <div className="mt-2 border-t border-emerald-500/30 pt-2 text-[10px] text-neutral-500">
+                    Based on Ingolstadt-sized city (130K pop). Scaled from McKinsey AV economics model.
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4">
               <div className="text-3xl font-bold text-emerald-300">60%</div>

@@ -27,8 +27,8 @@ export function DataSources() {
           <path d="M12 10v4M10 12h4" />
         </svg>
       ),
-      description: "Based on Audi Forum (1.8 MW), Nordbahnhof (2.2 MW), and GVZ (1.5 MW) industrial charging infrastructure. Numbers sourced from Stadtwerke Ingolstadt grid planning docs.",
-      status: "Estimated",
+      description: "Estimated based on typical urban depot charging capacity (1-2 MW per site). Locations chosen near major transit hubs (Nordbahnhof station, Audi campus, GVZ logistics area). Actual capacity would come from municipal utility data.",
+      status: "Assumed",
       color: "emerald",
     },
     {
@@ -38,8 +38,8 @@ export function DataSources() {
           <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
         </svg>
       ),
-      description: "Inferred from traffic delay patterns + population density. Higher congestion corridors signal higher ride demand (validated against Ingolstadt public transport ridership reports).",
-      status: "Derived",
+      description: "Derived from TomTom traffic delay patterns. Assumption: higher congestion = higher mobility need. This is a proxy visualization; production systems would use actual transit ridership or ride-hailing data.",
+      status: "Proxy",
       color: "sky",
     },
   ];

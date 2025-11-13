@@ -130,10 +130,10 @@ export function BaselineExplainer() {
                   <div className="mt-4 rounded-xl border border-violet-500/30 bg-violet-500/10 p-4">
                     <div className="flex items-start gap-3">
                       <svg className="h-5 w-5 flex-shrink-0 text-violet-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
                       <p className="text-xs leading-relaxed text-violet-200/90">
-                        <strong className="text-violet-300">During your presentation:</strong> Click "Run the optimizer" and watch this metric change in real-time. The delta (vs baseline) shows the exact improvement the RL policy delivers. You can adjust policy weights to demonstrate trade-offs.
+                        <strong className="text-violet-300">How baseline was set:</strong> Based on typical public transit reliability benchmarks (70-80% for European cities) and standard AV energy consumption estimates from published pilot studies (Waymo, Cruise, EasyMile). Grid stress calibrated to Ingolstadt's transformer capacity.
                       </p>
                     </div>
                   </div>

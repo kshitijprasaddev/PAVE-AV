@@ -16,6 +16,7 @@ import { DataSources } from "@/components/DataSources";
 import { BaselineExplainer } from "@/components/BaselineExplainer";
 import { DemandExplainer } from "@/components/DemandExplainer";
 import { TransitComparison } from "@/components/TransitComparison";
+import { CollapsibleSection } from "@/components/CollapsibleSection";
 import {
   simulateEpisode,
   perturbParams,
@@ -513,7 +514,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               </Reveal>
               <Reveal delay={0.14}>
                 <p className="mt-4 text-sm leading-relaxed text-neutral-300 sm:text-base">
-                  Watch live traffic, adjust the reinforcement learning policy, and see fleet deployment recommendations update instantly. Click &quot;Run the optimizer&quot; to start.
+                  Explore traffic patterns, run the RL optimizer, and compare optimized AV performance against INVG's current 274-bus fleet.
                 </p>
               </Reveal>
             </div>
@@ -656,23 +657,39 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           </motion.div>
         </div>
 
-        <div className="mt-8 space-y-8">
-          <CongestionStory />
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: revealed ? 1 : 0, y: revealed ? 0 : 20 }}
-            transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
+        <div className="mt-12 space-y-8">
+          <CollapsibleSection
+            title="Traffic Analysis Deep Dive"
+            subtitle="Detailed corridor congestion data from TomTom"
+            defaultOpen={false}
           >
-            <TrafficInsights
-              data={trafficData}
-              loading={trafficLoading}
-              error={trafficError}
-              refresh={refreshTraffic}
-            />
-          </motion.div>
-          <DataSources />
+            <CongestionStory />
+            <div className="mt-8">
+              <TrafficInsights
+                data={trafficData}
+                loading={trafficLoading}
+                error={trafficError}
+                refresh={refreshTraffic}
+              />
+            </div>
+          </CollapsibleSection>
+          <CollapsibleSection 
+            title="Data Sources & Transparency" 
+            subtitle="Where every number comes from"
+            badge="Optional"
+          >
+            <DataSources />
+          </CollapsibleSection>
+          
           <TransitComparison />
-          <BaselineExplainer />
+          
+          <CollapsibleSection 
+            title="Understanding the Metrics" 
+            subtitle="What baseline means and how RL improves performance"
+            badge="Guide"
+          >
+            <BaselineExplainer />
+          </CollapsibleSection>
         </div>
       </section>
 

@@ -42,7 +42,7 @@ const impactTiles = [
 
 export function ImpactStory() {
   return (
-    <div className="space-y-12">
+    <div className="space-y-20 sm:space-y-32">
       {impactTiles.map((tile, idx) => {
         const ref = useRef(null);
         const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -72,9 +72,12 @@ export function ImpactStory() {
         const colors = accentColors[tile.accentColor as keyof typeof accentColors];
 
         return (
-          <section
+          <motion.section
             key={tile.id}
             ref={ref}
+            initial={{ opacity: 0, y: 60 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/80 to-black shadow-2xl"
           >
             <div className={`grid lg:grid-cols-2 ${isEven ? "" : "lg:grid-flow-dense"}`}>
@@ -148,7 +151,7 @@ export function ImpactStory() {
                 </motion.div>
               </div>
             </div>
-          </section>
+          </motion.section>
         );
       })}
 

@@ -15,6 +15,7 @@ import { CongestionStory } from "@/components/CongestionStory";
 import { DataSources } from "@/components/DataSources";
 import { BaselineExplainer } from "@/components/BaselineExplainer";
 import { DemandExplainer } from "@/components/DemandExplainer";
+import { TransitComparison } from "@/components/TransitComparison";
 import {
   simulateEpisode,
   perturbParams,
@@ -670,6 +671,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             />
           </motion.div>
           <DataSources />
+          <TransitComparison />
           <BaselineExplainer />
         </div>
       </section>

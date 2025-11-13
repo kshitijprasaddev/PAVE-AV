@@ -186,7 +186,7 @@ export function buildOrchestrationPlan(routes: RouteDetails[]): OrchestrationPla
     {
       window: "01:00 to 04:00",
       action: "Offer 2 MW vehicle-to-grid buffer using idle fleet at GVZ Ingolstadt logistics hub.",
-      rationale: "Supports Stadtwerke load balancing; vehicles remain above 70% state-of-charge by 05:30.",
+      rationale: "Supports municipal grid load balancing; vehicles remain above 70% state-of-charge by 05:30.",
     },
   ];
 

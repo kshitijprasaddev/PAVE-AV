@@ -21,7 +21,7 @@ export default function HowItWorksPage() {
             <span className="font-semibold">Fleet agent</span>: A constrained heuristic assigns AV blocks to hotspots, guaranteeing minimum coverage and reserving capacity for first/last-mile connections.
           </li>
           <li>
-            <span className="font-semibold">Energy co-optimisation</span>: Charging windows align with Stadtwerke load curves and rooftop solar peaks; the model recommends V2G buffer opportunities.
+            <span className="font-semibold">Energy co-optimisation</span>: Charging windows align with time-of-use pricing (avoiding peak demand hours); the model can recommend V2G buffer opportunities when integrated with utility grid signals.
           </li>
         </ol>
       </Reveal>

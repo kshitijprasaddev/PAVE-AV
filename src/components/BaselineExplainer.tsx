@@ -8,8 +8,8 @@ const metrics = [
     id: "reliability",
     name: "Reliability",
     baseline: "75.0%",
-    explanation: "The **baseline** represents the current public transit system's performance. At 75%, this means that 3 out of 4 requested rides are served on time. When you run the RL optimizer, it tests different fleet sizes and routing strategies. If the new reliability is 91.7%, that's a **16.7% improvement** over baseline, meaning AVs serve more riders without adding vehicles.",
-    howItWorks: "The RL agent learns which corridors have high demand and positions vehicles proactively. It minimizes wait times by predicting where riders will be, not just reacting to requests.",
+    explanation: "The **baseline** represents the current public transit system's performance. At 75%, this means that 3 out of 4 requested rides are served successfully. When you run the RL optimizer, it tests different fleet sizes and routing strategies. If reliability increases to 91.7%, that's a **16.7% improvement**, meaning more riders get served. **Note:** If reliability drops (shows negative %), the RL policy is exploring a trade-off, sacrificing some reliability to save energy or reduce grid stress. This is intentional. The agent is testing whether serving 5% fewer riders but cutting energy costs by 20% delivers better overall value.",
+    howItWorks: "The RL agent learns which corridors have high demand and positions vehicles proactively. It minimizes wait times by predicting where riders will be, not just reacting to requests. During training, it deliberately tests bad policies to learn what doesn't work.",
   },
   {
     id: "energy",

@@ -14,6 +14,7 @@ import { NeuralNetworkViz } from "@/components/NeuralNetworkViz";
 import { CongestionStory } from "@/components/CongestionStory";
 import { DataSources } from "@/components/DataSources";
 import { BaselineExplainer } from "@/components/BaselineExplainer";
+import { DemandExplainer } from "@/components/DemandExplainer";
 import {
   simulateEpisode,
   perturbParams,
@@ -42,12 +43,6 @@ const EUROPE_ROADMAP = [
     headline: "Ingolstadt twin is up and streaming.",
     detail: "Four corridors, 120 AVs, and charging load already feed this layout (the exact setup the jury will see first).",
     stamp: "Now",
-  },
-  {
-    stage: "Showcase",
-    headline: "Public demos let anyone rerun the twin",
-    detail: "Stakeholders can flip policies, re-run the optimizer, and watch the numbers update on the main screen in real time.",
-    stamp: "20 Nov 2025",
   },
   {
     stage: "Expansion",
@@ -371,14 +366,14 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
     cards.push({
       label: "Reliability",
       value: `${reliability.toFixed(1)}%`,
-      detail: "Share of rides served across the twin",
+      detail: "% of ride requests successfully served by the fleet",
       delta: `${(reliability - baselineReliability).toFixed(1)}% vs baseline`,
       mood: reliability - baselineReliability >= 0 ? "positive" : "negative",
     });
     cards.push({
       label: "Energy per ride",
       value: `${energy.toFixed(2)} kWh`,
-      detail: "Average energy draw per completed trip",
+      detail: "Avg kWh consumed per passenger trip (charging + driving)",
       delta: `${(baselineEnergy - energy).toFixed(2)} kWh saved`,
       mood: baselineEnergy - energy >= 0 ? "positive" : "negative",
     });
@@ -566,6 +561,8 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               />
             )}
           </motion.div>
+
+          <DemandExplainer />
 
           <motion.div
             ref={optimizerPanelRef}

@@ -84,7 +84,7 @@ export function ImpactStory() {
                   src={tile.image}
                   alt={tile.label}
                   fill
-                  className="object-cover opacity-50"
+                  className="object-cover opacity-70"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                 />
                 <div className={`absolute inset-0 bg-gradient-to-${isEven ? "r" : "l"} from-black/95 via-black/70 to-black/95`} />
@@ -168,7 +168,7 @@ export function ImpactStory() {
             <h3 className="text-2xl font-bold text-emerald-300 sm:text-3xl">The Solution: This Platform</h3>
           </div>
           <p className="text-lg leading-relaxed text-neutral-300">
-            Instead of spending millions on consultants and years on studies, cities can use this orchestrator to simulate AV deployments in hours. Run scenarios with the RL optimizer, prove ROI to councils with data, and deploy fleets where they save the most lives, time, and money.
+            Most cities spend years debating where to deploy AVs, burning through consultant fees while missing the window to act. This platform flips that script. Load your city's traffic data, run the optimizer, and within hours you'll have a deployment plan backed by hard numbers. No guesswork. No endless meetings. Just clear proof of which corridors save the most lives and deliver the fastest ROI.
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4">

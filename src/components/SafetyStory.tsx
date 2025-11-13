@@ -43,12 +43,12 @@ const safetyStats = [
 const platformBenefits = [
   {
     title: "Pinpoint High-Impact Corridors",
-    description: "Uses real TomTom traffic data to identify exactly which streets have the worst congestion, crashes, and delays—so you deploy AVs where they deliver maximum ROI, not guesswork.",
+    description: "Uses real TomTom traffic data to identify exactly which streets have the worst congestion, crashes, and delays, so you deploy AVs where they deliver maximum ROI, not guesswork.",
     impact: "3× better placement",
   },
   {
     title: "Prove ROI Before Spending",
-    description: "Run simulations with the RL optimizer to show city councils precise safety improvements, cost savings, and energy reductions—get funding approved 60% faster with data, not promises.",
+    description: "Run simulations with the RL optimizer to show city councils precise safety improvements, cost savings, and energy reductions. Get funding approved 60% faster with data, not promises.",
     impact: "60% faster approval",
   },
   {

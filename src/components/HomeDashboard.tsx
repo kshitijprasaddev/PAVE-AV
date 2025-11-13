@@ -13,6 +13,7 @@ import { ExperienceStrip } from "@/components/ExperienceStrip";
 import { NeuralNetworkViz } from "@/components/NeuralNetworkViz";
 import { CongestionStory } from "@/components/CongestionStory";
 import { DataSources } from "@/components/DataSources";
+import { BaselineExplainer } from "@/components/BaselineExplainer";
 import {
   simulateEpisode,
   perturbParams,
@@ -576,7 +577,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             <div className="card-hover flex flex-col gap-6 rounded-3xl border border-white/10 bg-gradient-to-br from-neutral-900/60 to-neutral-950/80 p-6 shadow-xl backdrop-blur">
               <div>
                 <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">City baseline</h3>
-                <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">Reliability, energy, grid stress, and reward move here as soon as the optimizer runs.</p>
+                <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">These metrics show current system performance. When you run the optimizer, watch how RL improves each one.</p>
                 <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   {headlineStats.map((card, index) => (
                     <Reveal key={card.label} delay={0.08 * index}>
@@ -672,6 +673,7 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
             />
           </motion.div>
           <DataSources />
+          <BaselineExplainer />
         </div>
       </section>
 

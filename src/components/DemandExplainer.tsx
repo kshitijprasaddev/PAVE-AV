@@ -47,25 +47,19 @@ export function DemandExplainer() {
       >
         <div className="space-y-4 border-t border-sky-500/30 p-6">
           <p className="text-sm leading-relaxed text-sky-200/90">
-            Blue heat patches show inferred rider demand (not live ride requests). Calculated from:
+            <strong className="text-sky-300">Blue heat patches</strong> visualize inferred rider demand based on where traffic congestion is worst.
           </p>
-          <div className="space-y-2 text-sm text-sky-200/80">
-            <div className="flex items-start gap-2">
-              <span className="mt-0.5 text-sky-400">•</span>
-              <span><strong className="text-sky-300">Traffic delay patterns</strong> (TomTom data: high congestion = high mobility need)</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="mt-0.5 text-sky-400">•</span>
-              <span><strong className="text-sky-300">Population density</strong> (census: more residents = higher ridership potential)</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="mt-0.5 text-sky-400">•</span>
-              <span><strong className="text-sky-300">Land use</strong> (transit hubs, offices, retail attract riders)</span>
+          <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-sky-300">How It's Calculated:</div>
+            <div className="mt-2 space-y-1.5 text-xs text-sky-200/80">
+              <div>• Corridors with <strong className="text-sky-300">high delay</strong> (from TomTom traffic) get brighter blue</div>
+              <div>• Corridors with <strong className="text-sky-300">more route segments</strong> show higher density</div>
+              <div>• <strong className="text-sky-300">Logic:</strong> High congestion = more people trying to move = higher ride demand</div>
             </div>
           </div>
-          <div className="rounded-lg border border-sky-500/30 bg-sky-500/10 p-3">
-            <p className="text-xs leading-relaxed text-sky-200/90">
-              <strong className="text-sky-300">Why proxies?</strong> Pre-launch, no historical ride data exists. Congestion + demographics reliably predict demand. Post-launch, replace with actual booking patterns.
+          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3">
+            <p className="text-xs leading-relaxed text-amber-200/90">
+              <strong className="text-amber-300">Limitation:</strong> This is a proxy, not real ride booking data. In production, cities would feed actual transit ridership or ride-hailing patterns. For this demo, traffic delay serves as a reasonable demand indicator.
             </p>
           </div>
         </div>

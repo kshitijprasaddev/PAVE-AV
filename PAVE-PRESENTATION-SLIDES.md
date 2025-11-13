@@ -17,46 +17,61 @@
 
 ---
 
-## **SLIDE 2: The Problem (3 Stats)**
-**Title:** The Deployment Gap
+## **SLIDE 2: The Problem (3 Challenges)**
+**Title:** Why AV Deployment Stalls
 
 **Three Columns:**
-1. **€2-5M Wasted on Studies**
-   - Traditional feasibility studies take 3-5 years
-   
-2. **274 Buses, Stagnant Ridership**
-   - Ingolstadt INVG serves 15.5M/year (unchanged since 2011)
-   
-3. **No Data-Driven Plan**
-   - Cities deploy based on consultant reports, not traffic proof
+
+1. **Lives & Time Lost**
+   - 1.35M lives lost in crashes annually (94% human error)
+   - 70B+ hours wasted in traffic congestion
+   - AVs can fix this, but where to deploy them?
+
+2. **Energy & Grid Uncertainty**
+   - Uncoordinated charging overloads substations
+   - Peak-hour rates make operations expensive
+   - No data on optimal charging windows
+
+3. **Planning Paralysis**
+   - Cities lack tools to prove ROI upfront
+   - Unknown: which corridors benefit most?
+   - Unknown: how many AVs actually needed?
 
 **Visuals:**
 - Use the pedestrian crossing image (deployment-gap.jpg)
+- Icons for each challenge (warning, lightning bolt, question mark)
 
 **Speaker Notes:**
-"Ingolstadt's current transit system runs 274 buses serving 15.5 million annual riders. That ridership hasn't grown in over a decade. Cities want to deploy AVs to improve this, but feasibility studies cost millions and take years. Most importantly, they don't tell you which exact corridors benefit most."
+"Three problems block AV deployment. First, we know AVs can save 1.35 million lives and 70 billion hours annually, but cities don't know which corridors deliver maximum safety and efficiency gains. Second, energy: uncoordinated charging during peak hours overloads the grid and drives up costs. Third, planning paralysis: cities lack the tools to prove ROI before spending. They're stuck asking 'How many AVs do we actually need? Which streets should we prioritize?' Without data-driven answers, projects stall."
 
 ---
 
-## **SLIDE 3: The Solution (Platform Overview)**
-**Title:** Autonomous Orchestrator Platform
+## **SLIDE 3: The Solution (3 Capabilities)**
+**Title:** How the Orchestrator Solves This
 
-**Three Components (Icons + Text):**
-1. **Traffic Data** (TomTom icon)
-   - Real corridor congestion from August 2024
-   
-2. **RL Optimizer** (Neural network icon)
-   - PPO algorithm tests 1000s of deployment strategies
-   
-3. **Deployment Plan** (Map icon)
-   - Council-ready reports with ROI proof
+**Three Columns:**
+
+1. **Smart Deployment Planning**
+   - RL learns which corridors need AVs most
+   - Identifies optimal fleet size (120 vs 274 buses)
+   - Shows exactly where to deploy for max impact
+
+2. **Energy & Grid Coordination**
+   - Coordinates charging with off-peak pricing
+   - Avoids grid overload (10 pts stress reduction)
+   - Cuts energy cost 22% per passenger trip
+
+3. **Data-Driven ROI Proof**
+   - Simulates deployment before spending
+   - Quantifies lives saved, time freed, money saved
+   - Council-ready reports with traffic maps
 
 **Visuals:**
-- Simple flow diagram: Traffic → RL → Plan
-- Use emerald/sky/violet gradient
+- Three icons: Map marker, Lightning bolt, Document with checkmark
+- Use emerald/amber/sky gradient
 
 **Speaker Notes:**
-"Instead of paying consultants for 3 years, cities can use this platform. Load your traffic data, run the reinforcement learning optimizer, and within hours you have a deployment plan backed by simulations. The platform shows exactly which corridors save the most lives, time, and money."
+"The Autonomous Orchestrator solves all three problems. First, deployment planning: the RL agent analyzes traffic data and learns which corridors benefit most from AVs. It shows cities they need 120 vehicles, not 274 buses, to serve more riders. Second, energy coordination: it schedules charging during off-peak hours to avoid grid stress and cut costs by 22%. Third, ROI proof: cities can run simulations before spending a euro, then take those maps and metrics to their councils to secure funding. This platform turns AV ambition into actionable deployment plans."
 
 ---
 

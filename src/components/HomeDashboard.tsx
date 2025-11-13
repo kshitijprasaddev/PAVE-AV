@@ -676,7 +676,6 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
           <CollapsibleSection 
             title="Data Sources & Transparency" 
             subtitle="Where every number comes from"
-            badge="Optional"
           >
             <DataSources />
           </CollapsibleSection>

@@ -33,7 +33,7 @@ const impactTiles = [
     label: "Wasted on Studies",
     subtitle: "that take 3+ years to complete",
     description: "Cities want AVs but feasibility studies are expensive, slow, and often deploy fleets in the wrong corridors. This platform cuts planning to weeks with data-driven simulations and council-ready reports.",
-    image: "/media/mission-traffic.jpg",
+    image: "/media/deployment-gap.jpg",
     citation: "McKinsey Urban Mobility Report 2024",
     gradient: "from-sky-500/20 to-sky-600/5",
     accentColor: "sky",
@@ -158,7 +158,7 @@ export function ImpactStory() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-8 text-center shadow-2xl backdrop-blur sm:p-12"
+        className="relative z-20 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-8 text-center shadow-2xl backdrop-blur sm:p-12"
       >
         <div className="mx-auto max-w-3xl">
           <div className="mb-6 flex items-center justify-center gap-3">
@@ -174,7 +174,7 @@ export function ImpactStory() {
             <div className="group relative rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 transition hover:border-emerald-500/50">
               <div className="text-3xl font-bold text-emerald-300">18 months</div>
               <div className="mt-1 text-sm text-neutral-400">vs 3-5 years traditional</div>
-              <div className="absolute left-0 right-0 top-full z-10 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
+              <div className="absolute left-0 right-0 top-full z-50 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
                 <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Timeline Comparison</div>
                 <div className="mt-2 space-y-2 text-xs text-neutral-300">
                   <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-2">
@@ -204,7 +204,7 @@ export function ImpactStory() {
             <div className="group relative rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 transition hover:border-emerald-500/50">
               <div className="text-3xl font-bold text-emerald-300">€840M</div>
               <div className="mt-1 text-sm text-neutral-400">estimated savings over 10 years</div>
-              <div className="absolute left-0 right-0 top-full z-10 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
+              <div className="absolute left-0 right-0 top-full z-50 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
                 <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Cost Breakdown</div>
                 <div className="mt-2 space-y-1.5 text-xs text-neutral-300">
                   <div className="flex justify-between gap-4">
@@ -236,7 +236,7 @@ export function ImpactStory() {
             <div className="group relative rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 transition hover:border-emerald-500/50">
               <div className="text-3xl font-bold text-emerald-300">60%</div>
               <div className="mt-1 text-sm text-neutral-400">faster council approval</div>
-              <div className="absolute left-0 right-0 top-full z-10 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
+              <div className="absolute left-0 right-0 top-full z-50 mt-2 hidden rounded-xl border border-emerald-500/30 bg-black/95 p-4 shadow-2xl backdrop-blur group-hover:block">
                 <div className="text-xs font-semibold uppercase tracking-wider text-emerald-300">Approval Acceleration</div>
                 <div className="mt-2 space-y-2 text-xs text-neutral-300">
                   <div>

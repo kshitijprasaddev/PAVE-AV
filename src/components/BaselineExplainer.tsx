@@ -15,7 +15,7 @@ const metrics = [
     id: "energy",
     name: "Energy per Ride",
     baseline: "0.60 kWh",
-    explanation: "The **baseline** is the estimated energy cost per passenger trip if AVs were deployed without optimization. At 0.60 kWh, this represents a naive strategy (charge anytime, route reactively). The RL optimizer tests when to charge vehicles (off-peak vs peak hours) and how to route them efficiently to minimize empty miles. If energy drops to 0.48 kWh, the platform saves **0.12 kWh per ride**, which scales to millions in annual savings across a city fleet.",
+    explanation: "The **baseline** is the estimated energy per passenger trip if AVs were deployed without optimization. At 0.60 kWh per ride, this represents a naive strategy (charge anytime, route reactively, accept empty runs). The RL optimizer tests when to charge vehicles (off-peak to save money) and how to route them efficiently (minimize deadheading). Typical improvement: **0.48 kWh per ride** (20% reduction), which saves €550K annually on a 120-vehicle fleet serving 18M rides.",
     howItWorks: "The agent avoids peak electricity pricing by charging at night and coordinates routes to minimize empty deadheading (driving without passengers). It balances energy costs against service reliability.",
   },
   {

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Reveal, RevealStack } from "@/components/Reveal";
 
 export default function ImpactPage() {
@@ -7,22 +6,8 @@ export default function ImpactPage() {
       <Reveal>
         <h1 className="text-2xl font-bold">Impact</h1>
       </Reveal>
-      <Reveal delay={0.08}>
-        <figure className="mt-6 overflow-hidden rounded-2xl border border-neutral-200 shadow-sm dark:border-neutral-800">
-          <Image
-            src="/media/av-roundabout.jpg"
-            alt="Autonomous vehicles coordinating at a roundabout"
-            width={1591}
-            height={751}
-            className="h-auto w-full object-cover"
-          />
-          <figcaption className="bg-neutral-50 px-4 py-2 text-sm text-neutral-600 dark:bg-neutral-900 dark:text-neutral-300">
-            Coordinated AV movements smooth conflict points and free capacity for buses and micro-mobility.
-          </figcaption>
-        </figure>
-      </Reveal>
       <RevealStack
-        initialDelay={0.18}
+        initialDelay={0.12}
         items={[
           <div key="env">
             <h2 className="mt-6 text-lg font-semibold">Environmental</h2>

@@ -707,7 +707,6 @@ export function HomeDashboard({ revealed }: { revealed?: boolean }) {
               <h3 className="mt-2 text-2xl font-semibold text-neutral-900 dark:text-neutral-50 sm:text-3xl">
                 From Ingolstadt sandbox to continental service
               </h3>
-              <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">Swap the data feed for another city and the same layout updates (no slides to rebuild).</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
               {blueprintStats.map((item) => (

@@ -15,11 +15,14 @@ export function MetricsModal({ open, onClose, plan, routes }: { open: boolean; o
   } : undefined;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-50">
-      <div className="pointer-events-auto absolute top-24 left-6 max-h-[70vh] w-full max-w-md overflow-auto rounded-2xl border border-neutral-200 bg-white/90 p-5 shadow-xl backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/85">
-        <div className="mb-3 flex items-center justify-between">
+    <div className="pointer-events-none fixed inset-0 z-50 flex items-start justify-center px-4 py-6 sm:px-6 sm:py-12">
+      <div onClick={onClose} className="pointer-events-auto absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div className="pointer-events-auto relative max-h-[85vh] w-full max-w-md overflow-auto rounded-2xl border border-neutral-200 bg-white p-5 shadow-2xl dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="sticky top-0 z-10 mb-3 flex items-center justify-between border-b border-neutral-200 bg-white/95 pb-3 backdrop-blur dark:border-neutral-800 dark:bg-neutral-950/95">
           <h3 className="text-base font-semibold">How metrics are calculated</h3>
-          <button onClick={onClose} className="rounded-md border px-2 py-1 text-xs hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900">Close</button>
+          <button onClick={onClose} className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-neutral-300 text-sm font-bold transition hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900">
+            ×
+          </button>
         </div>
         <div className="space-y-5 text-sm text-neutral-600 dark:text-neutral-200">
           <section>

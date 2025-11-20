@@ -23,11 +23,8 @@ export function TopNav() {
   };
 
   const links = [
-    { href: "/vision", label: "Vision" },
-    { href: "/concept", label: "Concept" },
     { href: "/how-it-works", label: "How it works" },
     { href: "/rl-lab", label: "RL Lab" },
-    { href: "/impact", label: "Impact" },
     { href: "/stakeholders", label: "Stakeholders" },
   ];
 

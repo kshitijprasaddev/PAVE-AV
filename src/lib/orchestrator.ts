@@ -158,7 +158,8 @@ export function buildOrchestrationPlan(routes: RouteDetails[]): OrchestrationPla
   const serviceReliability = clamp(65 + averageReliability * 30, 65, 98);
 
   const avgEnergyPenalty = severityScores.reduce((acc, score) => acc + score, 0) / severityScores.length;
-  const energyPerRideKwh = Number((9 - 2.5 * avgEnergyPenalty).toFixed(2));
+  // Realistic baseline: 0.60 kWh/ride. Optimization saves 10-20% by smart charging & routing
+  const energyPerRideKwh = Number((0.60 - 0.12 * avgEnergyPenalty).toFixed(2));
 
   const gridStressIndex = clamp(35 + avgEnergyPenalty * 40, 20, 95);
 

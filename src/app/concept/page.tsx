@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Reveal, RevealStack } from "@/components/Reveal";
 
 export default function ConceptPage() {
@@ -7,23 +6,8 @@ export default function ConceptPage() {
       <Reveal>
         <h1 className="text-2xl font-bold">Concept: AV Orchestrator for Sustainable Cities</h1>
       </Reveal>
-      <Reveal delay={0.08}>
-        <figure className="mt-6 overflow-hidden rounded-2xl border border-neutral-200 shadow-sm dark:border-neutral-800">
-          <Image
-            src="/media/av-intersection.jpg"
-            alt="Autonomous shuttles negotiating a connected intersection"
-            width={1153}
-            height={768}
-            className="h-auto w-full object-cover"
-            priority
-          />
-          <figcaption className="bg-neutral-50 px-4 py-2 text-sm text-neutral-600 dark:bg-neutral-900 dark:text-neutral-300">
-            Connected intersections let the orchestrator choreograph lanes, signage, and autonomous pods in real time.
-          </figcaption>
-        </figure>
-      </Reveal>
       <RevealStack
-        initialDelay={0.18}
+        initialDelay={0.12}
         items={[
           <p className="mt-3 text-neutral-700 dark:text-neutral-300" key="p1">
             The concept is a city-scale orchestration layer for autonomous vehicles that balances three goals: serve people fairly, cut energy and emissions, and use streets more efficiently. The system forecasts demand block by block and coordinates AV fleets to reposition, pool rides, and charge when electricity is cleaner and cheaper.
